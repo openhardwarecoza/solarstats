@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pi/solarstats/inverter-cli/inverter.cpp
+fcntl.h
+-
+stdio.h
+-
+string.h
+-
+unistd.h
+-
+inverter.h
+/home/pi/solarstats/inverter-cli/inverter.h
+tools.h
+/home/pi/solarstats/inverter-cli/tools.h
+main.h
+/home/pi/solarstats/inverter-cli/main.h
+fcntl.h
+-
+termios.h
+-
+
+/home/pi/solarstats/inverter-cli/inverter.h
+thread
+-
+mutex
+-
+
+/home/pi/solarstats/inverter-cli/main.h
+atomic
+-
+inverter.h
+/home/pi/solarstats/inverter-cli/inverter.h
+
+/home/pi/solarstats/inverter-cli/tools.h
+

@@ -1,0 +1,3 @@
+/home/pi/solarstats/inverter-cli/CMakeFiles/rebuild_cache.dir
+/home/pi/solarstats/inverter-cli/CMakeFiles/inverter_poller.dir
+/home/pi/solarstats/inverter-cli/CMakeFiles/edit_cache.dir
