@@ -1,0 +1,10 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+  socket.on('inverterData', function(data) {
+    console.log("inverterData", data);
+    document.getElementById("json").textContent = JSON.stringify(data, undefined, 2);
+  });
+</script>
+
+<pre id="json"></pre>
