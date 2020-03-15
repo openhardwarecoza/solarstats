@@ -1,1 +1,0 @@
-/usr/bin/c++  -O2 --std=c++0x   -rdynamic CMakeFiles/inverter_poller.dir/inputparser.cpp.o CMakeFiles/inverter_poller.dir/inverter.cpp.o CMakeFiles/inverter_poller.dir/main.cpp.o CMakeFiles/inverter_poller.dir/tools.cpp.o  -o inverter_poller -lpthread 

@@ -19,6 +19,7 @@
   "dependencies": {
     "@serialport/parser-byte-length": "^8.0.6",
     "express": "^4.17.1",
+    "influx": "^5.5.1",
     "ip": "^1.1.5",
     "serialport": "^8.0.7",
     "socket.io": "^2.3.0"

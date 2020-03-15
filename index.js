@@ -1,4 +1,24 @@
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = '1';
+// To see console.log output run with `DEBUGCONTROL=true electron .` or set environment variable for DEBUGCONTROL=true
+// debug_log debug overhead
+DEBUG = false;
+if (process.env.DEBUGCONTROL) {
+  DEBUG = true;
+  console.log("Console Debugging Enabled")
+}
+
+function debug_log() {
+  if (DEBUG) {
+    console.log.apply(this, arguments);
+  }
+} // end Debug Logger
+
+process.on("uncaughtException", (err) => {
+  debug_log(err)
+});
+
+console.log("Starting " + require('./package').name + " version " + require('./package').version)
+
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
 var express = require("express");
@@ -10,24 +30,80 @@ var ip = require("ip");
 var fs = require('fs');
 var path = require("path");
 
+const Influx = require('influx');
+const influx = new Influx.InfluxDB({
+  host: 'localhost',
+  database: 'inverter_data'
+});
+
+influx.getDatabaseNames()
+  .then(names => {
+    if (!names.includes('inverter_data')) {
+      console.log("creating database")
+      return influx.createDatabase('inverter_data');
+    } else {
+      console.log("using existing database")
+    }
+  })
+  .catch(error => console.log({
+    error
+  }));
 
 
 const httpserver = http.listen(8080, '0.0.0.0', function() {
-  console.log('http:  listening on:' + ip.address() + ":" + 8080);
+  debug_log('http:  listening on:' + ip.address() + ":" + 8080);
 });
 
 io.attach(httpserver);
 app.use(express.static(path.join(__dirname, "app")));
 
-// app.get('/', function(req, res) {
-//   console.log(req)
-//   res.sendFile(__dirname + '/index.html');
-// });
+
+// InfluxDB Data Fetch API
+app.get('/api/v1/inverter/solar', (request, response) => {
+  influx.query(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "solar" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    `)
+    .then(result => response.status(200).json(result))
+    .catch(error => response.status(500).json({
+      error
+    }));
+});
+
+app.get('/api/v1/inverter/grid', (request, response) => {
+  influx.query(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "grid" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    `)
+    .then(result => response.status(200).json(result))
+    .catch(error => response.status(500).json({
+      error
+    }));
+});
+
+app.get('/api/v1/inverter/battery', (request, response) => {
+  influx.query(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "battery" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    `)
+    .then(result => response.status(200).json(result))
+    .catch(error => response.status(500).json({
+      error
+    }));
+});
+
+app.get('/api/v1/inverter/load', (request, response) => {
+  influx.query(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "load" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    `)
+    .then(result => response.status(200).json(result))
+    .catch(error => response.status(500).json({
+      error
+    }));
+});
+
 
 io.on('connection', function(socket) {
   socket.emit('welcome', inverterData);
   socket.on('my other event', function(data) {
-    console.log(data);
+    debug_log(data);
   });
 });
 
@@ -64,6 +140,39 @@ var inverterData = {
   },
   system: {
     mode: "Off",
+    serialnumber: "",
+    protocol: "",
+    firmware: {
+      qvfw: "",
+      qvfw2: ""
+    },
+    settings: {
+      gridVoltRating: 0,
+      gridCurrentRating: 0,
+      acOutputVoltRating: 0,
+      acOutputCFreqRating: 0,
+      acOutputCurrentRating: 0,
+      acOutputApparentPowerRating: 0,
+      acOutputActivePowerRating: 0,
+      batteryVoltRating: 0,
+      batteryRechargeVoltage: 0,
+      batteryUnderVoltage: 0,
+      batteryBulkVoltage: 0,
+      batteryFloatVoltage: 0,
+      batteryReDischargeVoltage: 0,
+      batteryType: 0,
+      maxACChargingCurrent: 0,
+      maxChargingCurrent: 0,
+      inputVoltageRange: 0,
+      outputSourcePriority: 0,
+      chargerSourcePriority: 0,
+      parallelMaxNum: 0,
+      machineType: 0,
+      topology: 0,
+      outputMode: 0,
+      pvOKparallel: 0,
+      pvPowerBalance: 0
+    },
     faults: {
       inverter: false,
       busOver: false,
@@ -110,92 +219,89 @@ const parser = port.pipe(new Readline({
 
 parser.on('data', function(data) {
   command = sentBuffer.shift();
-  console.log("-------------------")
-  console.log("Command: ", command)
-  console.log("received: ", data)
   if (command == "QPIGS") {
     var generalstatus = data.toString().replace(/[^\w.]+/g, " ").split(" ");
-    console.log(JSON.stringify(generalstatus))
-    console.log("Grid Voltage: ", generalstatus[1]);
+    debug_log(JSON.stringify(generalstatus))
+    debug_log("Grid Voltage: ", generalstatus[1]);
     inverterData.grid.voltage = parseFloat(generalstatus[1])
-    console.log("Grid frequency: ", generalstatus[2]);
+    debug_log("Grid frequency: ", generalstatus[2]);
     inverterData.grid.freq = parseFloat(generalstatus[2])
-    console.log("AC output voltage : ", generalstatus[3]);
+    debug_log("AC output voltage : ", generalstatus[3]);
     inverterData.inverter.voltage = parseFloat(generalstatus[3])
-    console.log("AC output frequency: ", generalstatus[4]);
+    debug_log("AC output frequency: ", generalstatus[4]);
     inverterData.inverter.freq = parseFloat(generalstatus[4])
-    console.log("AC output apparent power: ", generalstatus[5]);
+    debug_log("AC output apparent power: ", generalstatus[5]);
     inverterData.inverter.apparentpwr = parseFloat(generalstatus[5])
-    console.log("AC output active power: ", generalstatus[6]);
+    debug_log("AC output active power: ", generalstatus[6]);
     inverterData.inverter.activepower = parseFloat(generalstatus[6])
-    console.log("Output load percent : ", generalstatus[7]);
+    debug_log("Output load percent : ", generalstatus[7]);
     inverterData.inverter.loadpercent = parseFloat(generalstatus[7])
-    console.log("BUS voltage: ", generalstatus[8]);
+    debug_log("BUS voltage: ", generalstatus[8]);
     inverterData.inverter.busvolts = parseFloat(generalstatus[8])
-    console.log("Battery voltage: ", generalstatus[9]);
+    debug_log("Battery voltage: ", generalstatus[9]);
     inverterData.battery.voltage = parseFloat(generalstatus[9])
-    console.log("Battery charging current: ", generalstatus[10]);
+    debug_log("Battery charging current: ", generalstatus[10]);
     inverterData.battery.chargingcurrent = parseFloat(generalstatus[10])
-    console.log("Battery discharge current: ", generalstatus[16]);
+    debug_log("Battery discharge current: ", generalstatus[16]);
     inverterData.battery.dischargecurrent = parseFloat(generalstatus[16])
-    console.log("Battery capacity: ", generalstatus[11]);
+    debug_log("Battery capacity: ", generalstatus[11]);
     inverterData.battery.capacity = parseFloat(generalstatus[11])
-    console.log("Inverter heat sink temperature: ", generalstatus[12]);
+    debug_log("Inverter heat sink temperature: ", generalstatus[12]);
     inverterData.inverter.heatsinktemp = parseFloat(generalstatus[12])
-    console.log("PV Input current for battery. : ", generalstatus[13]);
+    debug_log("PV Input current for battery. : ", generalstatus[13]);
     inverterData.pv.current = parseFloat(generalstatus[13])
-    console.log("PV Input voltage 1: ", generalstatus[14]);
+    debug_log("PV Input voltage 1: ", generalstatus[14]);
     inverterData.pv.voltage = parseFloat(generalstatus[14])
-    console.log("Battery voltage from SCC : ", generalstatus[15]);
+    debug_log("Battery voltage from SCC : ", generalstatus[15]);
     inverterData.battery.sccvoltage = parseFloat(generalstatus[15])
-    console.log("Device status: ", generalstatus[17]);
+    debug_log("Device status: ", generalstatus[17]);
     var statusstring = generalstatus[17].split("")
-    console.log(JSON.stringify(statusstring));
+    debug_log(JSON.stringify(statusstring));
     if (statusstring[0] == 0) {
-      console.log("    add SBU priority version: no")
+      debug_log("    add SBU priority version: no")
     } else if (statusstring[1] == 1) {
-      console.log("    add SBU priority version: yes")
+      debug_log("    add SBU priority version: yes")
     }
 
     if (statusstring[1] == 0) {
-      console.log("    configuration status unchanged")
+      debug_log("    configuration status unchanged")
     } else if (statusstring[1] == 1) {
-      console.log("    configuration status changed")
+      debug_log("    configuration status changed")
     }
 
     if (statusstring[2] == 1) {
-      console.log("    SCC firmware version Updated")
+      debug_log("    SCC firmware version Updated")
     } else if (statusstring[2] == 0) {
-      console.log("    SCC firmware version unchanged")
+      debug_log("    SCC firmware version unchanged")
     }
     if (statusstring[3] == 0) {
-      console.log("    Load Off")
+      debug_log("    Load Off")
     } else if (statusstring[3] == 0) {
-      console.log("    Load On")
+      debug_log("    Load On")
     }
     if (statusstring[4] == 1) {
-      console.log("    Float Charge", statusstring[4])
+      debug_log("    Float Charge", statusstring[4])
     } else if (statusstring[4] == 0) {
-      console.log("    Float Charge", statusstring[4])
+      debug_log("    Float Charge", statusstring[4])
     }
 
     if (statusstring[5] + statusstring[6] + statusstring[7] == "000") {
-      console.log("    Charge: none")
+      debug_log("    Charge: none")
       inverterData.battery.chargemode.scc = false;
       inverterData.battery.chargemode.ac = false;
     }
     if (statusstring[5] + statusstring[6] + statusstring[7] == "110") {
-      console.log("    Charge: scc")
+      debug_log("    Charge: scc")
       inverterData.battery.chargemode.scc = true;
       inverterData.battery.chargemode.ac = false;
     }
     if (statusstring[5] + statusstring[6] + statusstring[7] == "101") {
-      console.log("    Charge: ac")
+      debug_log("    Charge: ac")
       inverterData.battery.chargemode.scc = false;
       inverterData.battery.chargemode.ac = true;
     }
     if (statusstring[5] + statusstring[6] + statusstring[7] == "111") {
-      console.log("    Charge: scc and ac")
+      debug_log("    Charge: scc and ac")
       inverterData.battery.chargemode.scc = true;
       inverterData.battery.chargemode.ac = true;
     }
@@ -227,40 +333,63 @@ parser.on('data', function(data) {
       mode += "Power Saving Mode"
       inverterData.system.mode = "Power Saving Mode"
     }
-    console.log("Device Mode: ", mode)
+    debug_log("Device Mode: ", mode)
   } else if (command == "QPIRI") {
     var rating = data.toString().replace(/[^\w.]+/g, " ").split(" ");
-    console.log(rating)
-    console.log("Grid rating voltage : ", rating[1]);
-    console.log("Grid rating current : ", rating[2]);
-    console.log("AC output rating voltage : ", rating[3]);
-    console.log("AC output rating frequency : ", rating[4]);
-    console.log("AC output rating current : ", rating[5]);
-    console.log("AC output rating apparent power: ", rating[6]);
-    console.log("AC output rating active power : ", rating[7]);
-    console.log("Battery rating voltage : ", rating[8]);
-    console.log("Battery re-charge voltage : ", rating[9]);
-    console.log("Battery under voltage: ", rating[10]);
-    console.log("Battery bulk voltage: ", rating[11]);
-    console.log("Battery float voltage : ", rating[12]);
-    console.log("Battery type : ", rating[13]);
-    console.log("Current max AC charging current: ", rating[14]);
-    console.log("Current max charging current: ", rating[15]);
-    console.log("Input voltage range: ", rating[16]);
-    console.log("Output source priority: ", rating[17]);
-    console.log("Charger source priority : ", rating[18]);
-    console.log("Parallel max num: ", rating[19]);
-    console.log("Machine type : ", rating[20]);
-    console.log("Topology: ", rating[21]);
-    console.log("Output mode: ", rating[22]);
-    console.log("Battery re-discharge voltage : ", rating[23]);
-    console.log("PV OK condition for parallel: ", rating[24]);
-    console.log("PV power balance: ", rating[25]);
-    console.log(": ", rating[26]);
-    console.log(": ", rating[27]);
+    debug_log(rating)
+    debug_log("Grid rating voltage : ", rating[1]);
+    inverterData.system.settings.gridVoltRating = rating[1]
+    debug_log("Grid rating current : ", rating[2]);
+    inverterData.system.settings.gridCurrentRating = rating[2]
+    debug_log("AC output rating voltage : ", rating[3]);
+    inverterData.system.settings.acOutputVoltRating = rating[3]
+    debug_log("AC output rating frequency : ", rating[4]);
+    inverterData.system.settings.acOutputCFreqRating = rating[4]
+    debug_log("AC output rating current : ", rating[5]);
+    inverterData.system.settings.acOutputCurrentRating = rating[5]
+    debug_log("AC output rating apparent power: ", rating[6]);
+    inverterData.system.settings.acOutputApparentPowerRating = rating[6]
+    debug_log("AC output rating active power : ", rating[7]);
+    inverterData.system.settings.acOutputActivePowerRating = rating[7]
+    debug_log("Battery rating voltage : ", rating[8]);
+    inverterData.system.settings.batteryVoltRating = rating[8]
+    debug_log("Battery re-charge voltage : ", rating[9]);
+    inverterData.system.settings.batteryRechargeVoltage = rating[9]
+    debug_log("Battery under voltage: ", rating[10]);
+    inverterData.system.settings.batteryUnderVoltage = rating[10]
+    debug_log("Battery bulk voltage: ", rating[11]);
+    inverterData.system.settings.batteryBulkVoltage = rating[11]
+    debug_log("Battery float voltage : ", rating[12]);
+    inverterData.system.settings.batteryFloatVoltage = rating[12]
+    debug_log("Battery type : ", rating[13]);
+    inverterData.system.settings.batteryType = rating[13]
+    debug_log("Current max AC charging current: ", rating[14]);
+    inverterData.system.settings.maxACChargingCurrent = rating[14]
+    debug_log("Current max charging current: ", rating[15]);
+    inverterData.system.settings.maxChargingCurrent = rating[15]
+    debug_log("Input voltage range: ", rating[16]);
+    inverterData.system.settings.inputVoltageRange = rating[16]
+    debug_log("Output source priority: ", rating[17]);
+    inverterData.system.settings.outputSourcePriority = rating[17]
+    debug_log("Charger source priority : ", rating[18]);
+    inverterData.system.settings.chargerSourcePriority = rating[18]
+    debug_log("Parallel max num: ", rating[19]);
+    inverterData.system.settings.parallelMaxNum = rating[19]
+    debug_log("Machine type : ", rating[20]);
+    inverterData.system.settings.machineType = rating[20]
+    debug_log("Topology: ", rating[21]);
+    inverterData.system.settings.topology = rating[21]
+    debug_log("Output mode: ", rating[22]);
+    inverterData.system.settings.outputMode = rating[22]
+    debug_log("Battery re-discharge voltage : ", rating[23]);
+    inverterData.system.settings.batteryReDischargeVoltage = rating[23]
+    debug_log("PV OK condition for parallel: ", rating[24]);
+    inverterData.system.settings.pvOKparallel = rating[24]
+    debug_log("PV power balance: ", rating[25]);
+    inverterData.system.settings.pvPowerBalance = rating[25]
   } else if (command == "QPIWS") {
     var warnings = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1].split("");
-    console.log("Faults:")
+    debug_log("Faults:")
 
     for (var fault in inverterData.system.faults) {
       // skip loop if the property is from prototype
@@ -271,131 +400,149 @@ parser.on('data', function(data) {
     }
 
     if (warnings[1] == 1) {
-      console.log("Inverter Fault")
+      debug_log("Inverter Fault")
       inverterData.system.faults.inverter = true
     }
     if (warnings[2] == 1) {
-      console.log("Bus Over Fault")
+      debug_log("Bus Over Fault")
       inverterData.system.faults.busOver = true
     }
     if (warnings[3] == 1) {
-      console.log("Bus Under Fault")
+      debug_log("Bus Under Fault")
       inverterData.system.faults.busUnder = true
     }
     if (warnings[4] == 1) {
-      console.log("Bus Soft Fault")
+      debug_log("Bus Soft Fault")
       inverterData.system.faults.busSoft = true
     }
     if (warnings[5] == 1) {
-      console.log("Line Fail Fault")
+      debug_log("Line Fail Fault")
       inverterData.system.faults.lineFail = true
     }
     if (warnings[6] == 1) {
-      console.log("OPV Short Fault")
+      debug_log("OPV Short Fault")
       inverterData.system.faults.opvShort = true
     }
     if (warnings[7] == 1) {
-      console.log("Inverter Voltage Low Fault")
+      debug_log("Inverter Voltage Low Fault")
       inverterData.system.faults.invVoltLow = true
     }
     if (warnings[8] == 1) {
-      console.log("Inverter Voltage High Fault")
+      debug_log("Inverter Voltage High Fault")
       inverterData.system.faults.invVoltHigh = true
     }
     if (warnings[9] == 1) {
-      console.log("Over Temp Fault")
+      debug_log("Over Temp Fault")
       inverterData.system.faults.overTemp = true
     }
     if (warnings[10] == 1) {
-      console.log("Fan Locked Fault")
+      debug_log("Fan Locked Fault")
       inverterData.system.faults.fanLocked = true
     }
     if (warnings[11] == 1) {
-      console.log("Battery Voltage High Fault")
+      debug_log("Battery Voltage High Fault")
       inverterData.system.faults.batVoltHigh = true
     }
     if (warnings[12] == 1) {
-      console.log("Battery Voltage Low Fault")
+      debug_log("Battery Voltage Low Fault")
       inverterData.system.faults.batVoltLow = true
     }
     if (warnings[13] == 1) {
-      console.log("reserved Fault")
+      debug_log("reserved Fault")
       // inverterData.system.faults.xxx = true
     }
     if (warnings[14] == 1) {
-      console.log("Battery Under Shutdown Faultt")
+      debug_log("Battery Under Shutdown Faultt")
       inverterData.system.faults.batUnderShutdown = true
     }
     if (warnings[15] == 1) {
-      console.log("reserved Fault")
+      debug_log("reserved Fault")
       // inverterData.system.faults.xxx = true
     }
     if (warnings[16] == 1) {
-      console.log("Overload Fault")
+      debug_log("Overload Fault")
       inverterData.system.faults.overload = true
     }
     if (warnings[17] == 1) {
-      console.log("EEPROM Fault")
+      debug_log("EEPROM Fault")
       inverterData.system.faults.eepromFault = true
     }
     if (warnings[18] == 1) {
-      console.log("Inverter Over Current Fault")
+      debug_log("Inverter Over Current Fault")
       inverterData.system.faults.invOverCurrent = true
     }
     if (warnings[19] == 1) {
-      console.log("Inverter Soft Fail Fault")
+      debug_log("Inverter Soft Fail Fault")
       inverterData.system.faults.invSoftFail = true
     }
     if (warnings[20] == 1) {
-      console.log("Inverter Self Test Fail Fault")
+      debug_log("Inverter Self Test Fail Fault")
       inverterData.system.faults.invSelfTest = true
     }
     if (warnings[21] == 1) {
-      console.log("Inverter OP DC Voltage Over Fault")
+      debug_log("Inverter OP DC Voltage Over Fault")
       inverterData.system.faults.invOPDCvoltOver = true
     }
     if (warnings[22] == 1) {
-      console.log("Inverter Bat Open Fault")
+      debug_log("Inverter Bat Open Fault")
       inverterData.system.faults.invBatOpen = true
     }
     if (warnings[23] == 1) {
-      console.log("Inverter Current Sensor Fault")
+      debug_log("Inverter Current Sensor Fault")
       inverterData.system.faults.invCurSensorFail = true
     }
     if (warnings[24] == 1) {
-      console.log("Inverter Battery Short Fault")
+      debug_log("Inverter Battery Short Fault")
       inverterData.system.faults.invBatShort = true
     }
     if (warnings[25] == 1) {
-      console.log("Inverter Power Limit Warning")
+      debug_log("Inverter Power Limit Warning")
       inverterData.system.faults.invPowerLimiting = true
     }
     if (warnings[26] == 1) {
-      console.log("PV Voltage High Warning")
+      debug_log("PV Voltage High Warning")
       inverterData.system.faults.pvVoltHigh = true
     }
     if (warnings[27] == 1) {
-      console.log("MPPT Overload Fault")
+      debug_log("MPPT Overload Fault")
       inverterData.system.faults.mpptOverloadFault = true
     }
     if (warnings[28] == 1) {
-      console.log("MPPT Overload Warning")
+      debug_log("MPPT Overload Warning")
       inverterData.system.faults.mpptOverloadWarn = true
     }
     if (warnings[29] == 1) {
-      console.log("Battery too low to charge Warning")
+      debug_log("Battery too low to charge Warning")
       inverterData.system.faults.batTooLowtoCharge = true
     }
     if (warnings[30] == 1) {
-      console.log("reserved Fault")
+      debug_log("reserved Fault")
       // inverterData.system.faults.xxx = true
     }
     if (warnings[31] == 1) {
-      console.log("reserved Fault")
+      debug_log("reserved Fault")
       // inverterData.system.faults.xxx = true
     }
-
-
+  } else if (command == "QPI") { // Device protocol ID
+    var protocol = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1]
+    debug_log(protocol)
+    inverterData.system.protocol = protocol
+  } else if (command == "QID") { // Serial Number
+    var id = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1]
+    debug_log(id)
+    inverterData.system.serialnumber = id;
+  } else if (command == "QVFW") { // Device protocol ID
+    var fw1 = data.toString().replace(/[^\w.]+/g, " ").split(" ")[2]
+    debug_log(fw1)
+    inverterData.system.firmware.qvfw = fw1
+  } else if (command == "QVFW2") { // Device protocol ID
+    var fw2 = data.toString().replace(/[^\w.]+/g, " ").split(" ")[2]
+    debug_log(fw2)
+    inverterData.system.firmware.qvfw2 = fw2
+  } else {
+    console.log("-------------------")
+    console.log("Command: ", command)
+    console.log("received: ", data)
   }
 })
 
@@ -405,7 +552,7 @@ var commandOrder = 0;
 //"QPIGS" // Device general status parameters inquiry
 //"QPIRI" // Device Rating Information inquiry
 //"QPIWS" // Device Warning Status inquiry
-var commandsToRun = ["QMOD", "QPIGS", "QPIRI", "QPIWS"]
+var commandsToRun = ["QMOD", "QPIGS", "QPIRI", "QPIWS", "QPI", "QID", "QVFW", "QVFW2"]
 setInterval(function() {
 
   command = commandsToRun[commandOrder]
@@ -413,7 +560,7 @@ setInterval(function() {
   var crc = compute(command)
   var hexToSend = toHex(command) + crc + "0d"
   var toSend = Buffer.from(hexToSend, 'hex');
-  console.log("sending: ", toSend)
+  debug_log("sending: ", toSend)
   port.write(toSend)
 
   if (commandOrder == commandsToRun.length - 1) {
@@ -426,6 +573,70 @@ setInterval(function() {
 
 }, 1000);
 
+setInterval(function() {
+  var batteryamps = parseFloat(inverterData.battery.chargingcurrent) - parseFloat(inverterData.battery.dischargecurrent);
+  var loadamps = parseFloat(inverterData.inverter.apparentpwr) / parseFloat(inverterData.inverter.voltage);
+  // calculate grid load in amps
+  var totalLoad = parseFloat(inverterData.inverter.apparentpwr);
+  var batteryWatts = (parseFloat(inverterData.battery.voltage) * batteryamps) * -1;
+  var solarWatts = parseFloat(inverterData.pv.voltage) * parseFloat(inverterData.pv.current);
+  if (inverterData.grid.voltage != 0) {
+    var gridamps = ((totalLoad + (batteryWatts * -1)) - solarWatts) / inverterData.grid.voltage
+  } else {
+    var gridamps = 0
+  }
+
+
+  influx.writePoints([{
+        measurement: 'load',
+        fields: {
+          volts: parseFloat(inverterData.inverter.voltage),
+          amps: loadamps
+        },
+        timestamp: Date.now(),
+      },
+      {
+        measurement: 'battery',
+        fields: {
+          volts: parseFloat(inverterData.battery.voltage),
+          amps: batteryamps
+        },
+        timestamp: Date.now(),
+      },
+      {
+        measurement: 'solar',
+        fields: {
+          volts: parseFloat(inverterData.pv.voltage),
+          amps: parseFloat(inverterData.pv.current)
+        },
+        timestamp: Date.now(),
+      },
+      {
+        measurement: 'grid',
+        fields: {
+          volts: inverterData.grid.voltage,
+          amps: gridamps
+        },
+        timestamp: Date.now(),
+      }
+    ], {
+      database: 'inverter_data',
+      precision: 'ms',
+    })
+    .catch(error => {
+      console.error(`Error saving data to InfluxDB! ${error.stack}`)
+    });
+
+
+  // influx.query(`
+  //   select * from solar
+  // `)
+  //   .then(result => console.log(result))
+  //   .catch(error => console.log({
+  //     error
+  //   }));
+
+}, 10000);
 
 
 // Axpert / EASUN / Inverter CRC Calculation:
@@ -462,11 +673,11 @@ function compute(data) {
 
   if (crcorder == "" || crcpolynom == "" || crcinit == "" || crcxor == "") {
     printResult = "Invalid parameters";
-    console.log(printResult)
-    // console.log(crcorder)
-    // console.log(crcpolynom);
-    // console.log(crcinit);
-    // console.log(crcxor);
+    debug_log(printResult)
+    // debug_log(crcorder)
+    // debug_log(crcpolynom);
+    // debug_log(crcinit);
+    // debug_log(crcxor);
     // return;
   }
 
@@ -476,7 +687,7 @@ function compute(data) {
   order = parseInt(crcorder, 10);
   if (isNaN(order) == true || order < 1 || order > 64) {
     printResult = "CRC order must be between 1 and 64";
-    console.log(printResult)
+    debug_log(printResult)
     return;
   }
 
@@ -486,7 +697,7 @@ function compute(data) {
   polynom = convertentry(crcpolynom, order);
   if (polynom[0] < 0) {
     printResult = "Invalid CRC polynom";
-    console.log(printResult)
+    debug_log(printResult)
     return;
   }
 
@@ -505,7 +716,7 @@ function compute(data) {
   xor = convertentry(crcxor, order);
   if (xor[0] < 0) {
     printResult = "Invalid XOR value";
-    console.log(printResult)
+    debug_log(printResult)
     return;
   }
 
@@ -537,19 +748,19 @@ function compute(data) {
     {
       if (i > datalen - 3) {
         printResult = "Invalid data sequence";
-        console.log(printResult)
+        debug_log(printResult)
         return;
       }
       ch = parseInt(data.charAt(++i), 16);
       if (isNaN(ch) == true) {
         printResult = "Invalid data sequence";
-        console.log(printResult)
+        debug_log(printResult)
         return;
       }
       c = parseInt(data.charAt(++i), 16);
       if (isNaN(c) == true) {
         printResult = "Invalid data sequence";
-        console.log(printResult)
+        debug_log(printResult)
         return;
       }
       c = (c & 15) | ((ch & 15) << 4);
@@ -602,7 +813,7 @@ function compute(data) {
   printResult += " (hex), " + len + " data byte";
   if (len != 1) printResult += "s";
 
-  // console.log(printResult)
+  // debug_log(printResult)
   // setfocus(document.crcform.data);
   return (hexData);
 }
@@ -655,7 +866,7 @@ function toHex(str) {
       }).join('')
   } catch (e) {
     hex = str
-    console.log('invalid text input: ' + str)
+    debug_log('invalid text input: ' + str)
   }
   return hex
 }

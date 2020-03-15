@@ -1,10 +1,56 @@
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io();
-  socket.on('inverterData', function(data) {
-    console.log("inverterData", data);
-    document.getElementById("json").textContent = JSON.stringify(data, undefined, 2);
-  });
-</script>
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="battery.css">
+
+  </head>
+
+  <body>
+    <div id="graph-container">
+      <!-- Append graph here -->
+    </div>
+
+    <div class="batterybox">
+      <div class="battery-top"></div>
+      <progress id="progressbar" max="100" value="0"></progress>
+      <div class="progress-value" id="battLevel">0%</div>
+    </div>
+
+
+    <script src="/plotly-latest.min.js"></script>
+    <script src="/jquery.min.js"></script>
+    <script src="/index.js"></script>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      socket.on('inverterData', function(data) {
+
+        console.log("inverterData", data);
+        document.getElementById("json").textContent = JSON.stringify(data, undefined, 2);
+        $("#battLevel").html(data.battery.capacity + "%")
+        var progressbar = $('#progressbar')
+        progressbar.val(data.battery.capacity)
+        if (parseFloat(data.battery.chargingcurrent) > 0) {
+          $(progressbar).after('<span class="bolt"><img src="lightning.png" alt=""></span>');
+        } else {
+
+          $(progressbar).after('');
+        }
+
+
+      });
+    </script>
+
+  </body>
+
+</html>
 
 <pre id="json"></pre>
