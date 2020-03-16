@@ -2,8 +2,14 @@ function unpackData(arr, key) {
   return arr.map(obj => obj[key])
 }
 
-
 function loadData() {
+  // if (!period) {
+  period = "8h"
+  // }
+
+  var select = $("#graphperiod").data('select');
+  period = select.val()
+
 
   var solartimes = [],
     solarwatts = [],
@@ -15,7 +21,7 @@ function loadData() {
     gridwatts = []
 
 
-  $.get("/api/v1/inverter/solar?date=" + new Date().getTime(), function(data) {
+  $.get("/api/v1/inverter/solar?period=" + period + "&date=" + new Date().getTime(), function(data) {
     console.log(data)
     for (i = 0; i < data.length; i++) {
       solartimes.push(new Date(data[i].time));
@@ -23,7 +29,7 @@ function loadData() {
     }
   });
 
-  $.get("/api/v1/inverter/load?date=" + new Date().getTime(), function(data) {
+  $.get("/api/v1/inverter/load?period=" + period + "&date=" + new Date().getTime(), function(data) {
     console.log(data)
     for (i = 0; i < data.length; i++) {
       loadtimes.push(new Date(data[i].time));
@@ -31,7 +37,7 @@ function loadData() {
     }
   });
 
-  $.get("/api/v1/inverter/battery?date=" + new Date().getTime(), function(data) {
+  $.get("/api/v1/inverter/battery?period=" + period + "&date=" + new Date().getTime(), function(data) {
     console.log(data)
     for (i = 0; i < data.length; i++) {
       batttimes.push(new Date(data[i].time));
@@ -39,7 +45,7 @@ function loadData() {
     }
   });
 
-  $.get("/api/v1/inverter/grid?date=" + new Date().getTime(), function(data) {
+  $.get("/api/v1/inverter/grid?period=" + period + "&date=" + new Date().getTime(), function(data) {
     console.log(data)
     for (i = 0; i < data.length; i++) {
       gridtimes.push(new Date(data[i].time));
@@ -49,9 +55,6 @@ function loadData() {
 
 
   setTimeout(function() {
-
-    console.log(gridwatts)
-
 
     var solarTrace = {
       type: 'scatter',
@@ -107,7 +110,12 @@ function loadData() {
 
     var data = [solarTrace, loadTrace, battTrace, gridTrace];
     var layout = {
-      title: '30 Bird Power'
+      margin: {
+        t: 22,
+        b: 35,
+        l: 55,
+        r: 15
+      },
     };
     return Plotly.newPlot('graph-container', data, layout);
   }, 1000)

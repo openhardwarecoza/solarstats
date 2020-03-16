@@ -42,3 +42,22 @@ main {
   height: 430px;
   width: 99%;
 }
+
+#graphoverlay {
+  font-size: 12px;
+  margin-left: 20px;
+  margin-right: 20px;
+  padding-left: 6px;
+  text-align: left;
+  position: absolute;
+  bottom: 30px;
+  left: -20px;
+  /* background: rgba(240, 240, 240, 0.85);
+  color: #444;
+  border-radius: 4px; */
+  width: 100%;
+  z-index: 1;
+  text-shadow: rgba(0, 0, 0, .2) 0 0 1px;
+  -webkit-font-smoothing: antialiased;
+  /* border: 1px solid rgba(55, 55, 55, 0.5); */
+}

@@ -8,12 +8,64 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
     <link rel="stylesheet" type="text/css" href="battery.css">
 
+    <meta name="metro4:init" content="true">
+    <link rel="stylesheet" href="lib/metro/css/metro-all.min.css" />
   </head>
 
+
+
   <body>
-    <div id="graph-container">
-      <!-- Append graph here -->
+
+    <div data-role="appbar" data-expand-point="md">
+      <a href="#" class="brand no-hover">
+        <!-- <span style="width: 55px;" class="p-2 border bd-dark border-radius">
+          m<sup>4</sup>
+        </span> -->
+      </a>
+
+      <ul class="app-bar-menu">
+        <li><a href="#">Home</a></li>
+        <li>
+          <a href="#" class="dropdown-toggle">Products</a>
+          <ul class="d-menu" data-role="dropdown">
+            <li><a href="#">Windows 10</a></li>
+            <li><a href="#">Office 365</a></li>
+            <li class="divider bg-lightGray"></li>
+            <li><a href="#">Skype</a></li>
+          </ul>
+        </li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contacts</a></li>
+      </ul>
     </div>
+
+    <div class="row" style="padding-top: 50px;">
+
+      <div class="cell-3">
+        <div>cell-3</div>
+      </div>
+      <div class="cell-9">
+        <div id="graph-container">
+          <!-- Append graph here -->
+        </div>
+        <div id="graphoverlay" class="text-center">
+          <div class="text-left drop-shadow" style="padding: 10px;z-index: 200; width: 140px; display: block; position: absolute; bottom:0px; right:20px; background: rgba(240, 240, 240, 0.5);">
+            Graph History:<br>
+            <select id="graphperiod" class="input-small" data-role="select" data-filter="false" data-on-change="loadData">
+              <option value="8h">8 hr</option>
+              <option value="1d">24 hr</option>
+              <option value="1w">1 wk</option>
+              <option value="30d">1 mn</option>
+              <option value="52w">1 yr</option>
+            </select>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
 
     <div class="batterybox">
       <div class="battery-top"></div>
@@ -24,9 +76,10 @@
 
     <script src="/plotly-latest.min.js"></script>
     <script src="/jquery.min.js"></script>
+
+    <script type="text/javascript" src="lib/metro/js/metro.min.js"></script>
+
     <script src="/index.js"></script>
-
-
 
     <script src="/socket.io/socket.io.js"></script>
     <script>

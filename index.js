@@ -60,8 +60,15 @@ app.use(express.static(path.join(__dirname, "app")));
 
 // InfluxDB Data Fetch API
 app.get('/api/v1/inverter/solar', (request, response) => {
+  var period = "8h"
+  if (request.query.period) {
+    period = request.query.period
+  }
+  console.log(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "solar" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
+    `)
   influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "solar" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "solar" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
     `)
     .then(result => response.status(200).json(result))
     .catch(error => response.status(500).json({
@@ -70,8 +77,15 @@ app.get('/api/v1/inverter/solar', (request, response) => {
 });
 
 app.get('/api/v1/inverter/grid', (request, response) => {
+  var period = "8h"
+  if (request.query.period) {
+    period = request.query.period
+  }
+  console.log(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "grid" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
+    `)
   influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "grid" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "grid" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
     `)
     .then(result => response.status(200).json(result))
     .catch(error => response.status(500).json({
@@ -80,8 +94,15 @@ app.get('/api/v1/inverter/grid', (request, response) => {
 });
 
 app.get('/api/v1/inverter/battery', (request, response) => {
+  var period = "8h"
+  if (request.query.period) {
+    period = request.query.period
+  }
+  console.log(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "battery" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
+    `)
   influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "battery" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "battery" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
     `)
     .then(result => response.status(200).json(result))
     .catch(error => response.status(500).json({
@@ -90,8 +111,15 @@ app.get('/api/v1/inverter/battery', (request, response) => {
 });
 
 app.get('/api/v1/inverter/load', (request, response) => {
+  var period = "8h"
+  if (request.query.period) {
+    period = request.query.period
+  }
+  console.log(`
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "load" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
+    `)
   influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "load" WHERE  time > now() - 48h GROUP BY time(10m) fill(none)
+    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "load" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
     `)
     .then(result => response.status(200).json(result))
     .catch(error => response.status(500).json({
