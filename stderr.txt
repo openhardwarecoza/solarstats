@@ -1,0 +1,15 @@
+Error saving data to InfluxDB! Error: connect ECONNREFUSED 127.0.0.1:8086
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16)
+Error saving data to InfluxDB! Error: connect ECONNREFUSED 127.0.0.1:8086
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16)
+Error saving data to InfluxDB! Error: connect ECONNREFUSED 127.0.0.1:8086
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16)
+Error saving data to InfluxDB! Error: No host available
+    at Pool.stream (/home/pi/solarstats/node_modules/influx/lib/src/pool.js:228:29)
+    at /home/pi/solarstats/node_modules/influx/lib/src/pool.js:165:18
+    at new Promise (<anonymous>)
+    at Pool.discard (/home/pi/solarstats/node_modules/influx/lib/src/pool.js:164:16)
+    at InfluxDB.writePoints (/home/pi/solarstats/node_modules/influx/lib/src/index.js:840:27)
+    at Timeout._onTimeout (/home/pi/solarstats/index.js:618:10)
+    at listOnTimeout (internal/timers.js:549:17)
+    at processTimers (internal/timers.js:492:7)

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <link rel="stylesheet" type="text/css" href="battery.css">
+
 
     <meta name="metro4:init" content="true">
     <link rel="stylesheet" href="lib/metro/css/metro-all.min.css" />
@@ -16,62 +16,167 @@
 
   <body>
 
-    <div data-role="appbar" data-expand-point="md">
-      <a href="#" class="brand no-hover">
-        <!-- <span style="width: 55px;" class="p-2 border bd-dark border-radius">
-          m<sup>4</sup>
-        </span> -->
-      </a>
 
-      <ul class="app-bar-menu">
-        <li><a href="#">Home</a></li>
-        <li>
-          <a href="#" class="dropdown-toggle">Products</a>
-          <ul class="d-menu" data-role="dropdown">
-            <li><a href="#">Windows 10</a></li>
-            <li><a href="#">Office 365</a></li>
-            <li class="divider bg-lightGray"></li>
-            <li><a href="#">Skype</a></li>
+
+    <div class="row">
+
+      <div class="cell-sm-full cell-md-4 cell-lg-3">
+
+        <div class="skill-box">
+          <div class="header bg-green fg-white" style="padding: 2px; margin: 5px; margin-bottom: 0px;">
+            <div class="title" style="font-size: 15px; font-weight: 600; padding: 2px; margin: 2px;">Solar Array</div>
+            <!-- <div class="subtitle">Pirate captain</div> -->
+          </div>
+          <ul class="skills">
+            <li class="pt-0 pb-0">
+              <span>Voltage</span>
+              <span class="float-right text-medium bg-white fg-black" id="solar-volt">0v</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Current</span>
+              <span class="float-right text-medium bg-white fg-black" id="solar-amp">0A</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Power</span>
+              <span class="float-right text-medium bg-white fg-black" id="solar-power">0w</span>
+            </li>
           </ul>
-        </li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Contacts</a></li>
-      </ul>
-    </div>
-
-    <div class="row" style="padding-top: 50px;">
-
-      <div class="cell-3">
-        <div>cell-3</div>
-      </div>
-      <div class="cell-9">
-        <div id="graph-container">
-          <!-- Append graph here -->
         </div>
-        <div id="graphoverlay" class="text-center">
-          <div class="text-left drop-shadow" style="padding: 10px;z-index: 200; width: 140px; display: block; position: absolute; bottom:0px; right:20px; background: rgba(240, 240, 240, 0.5);">
-            Graph History:<br>
-            <select id="graphperiod" class="input-small" data-role="select" data-filter="false" data-on-change="loadData">
-              <option value="8h">8 hr</option>
-              <option value="1d">24 hr</option>
-              <option value="1w">1 wk</option>
-              <option value="30d">1 mn</option>
-              <option value="52w">1 yr</option>
-            </select>
+
+        <div class="skill-box">
+          <div class="header bg-violet fg-white" style="padding: 2px; margin: 5px; margin-bottom: 0px;">
+            <div class="title" style="font-size: 15px; font-weight: 600; padding: 2px; margin: 2px;">Power Grid</div>
+            <!-- <div class="subtitle">Pirate captain</div> -->
+          </div>
+          <ul class="skills">
+            <li class="pt-0 pb-0">
+              <span>Voltage</span>
+              <span class="float-right text-medium bg-white fg-black" id="grid-volt">0v</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Current</span>
+              <span class="float-right text-medium bg-white fg-black" id="grid-amp">0A</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Power</span>
+              <span class="float-right text-medium bg-white fg-black" id="grid-power">0w</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="skill-box">
+          <div class="header bg-red fg-white" style="padding: 2px; margin: 5px; margin-bottom: 0px;">
+            <div class="title" style="font-size: 15px; font-weight: 600; padding: 2px; margin: 2px;">Output Load</div>
+            <!-- <div class="subtitle">Pirate captain</div> -->
+          </div>
+          <ul class="skills">
+            <li class="pt-0 pb-0">
+              <span>Voltage</span>
+              <span class="float-right text-medium bg-white fg-black" id="load-volt">0v</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Current</span>
+              <span class="float-right text-medium bg-white fg-black" id="load-amp">0A</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Power</span>
+              <span class="float-right text-medium bg-white fg-black" id="load-power">0w</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="skill-box">
+          <div class="header bg-cobalt fg-white" style="padding: 2px; margin: 5px; margin-bottom: 0px;">
+            <div class="title" style="font-size: 15px; font-weight: 600; padding: 2px; margin: 2px;">Battery</div>
+            <!-- <div class="subtitle">Pirate captain</div> -->
+          </div>
+          <ul class="skills">
+            <li class="pt-0 pb-0">
+              <span>Voltage</span>
+              <span class="float-right text-medium bg-white fg-black" id="battery-volt">0v</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Current</span>
+              <span class="float-right text-medium bg-white fg-black" id="battery-amp">0A</span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Power</span>
+              <span class="float-right text-medium bg-white fg-black" id="battery-power">0w</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="skill-box">
+          <div class="header bg-dark fg-white" style="padding: 2px; margin: 5px; margin-bottom: 0px;">
+            <div class="title" style="font-size: 15px; font-weight: 600; padding: 2px; margin: 2px;">Inverter</div>
+            <!-- <div class="subtitle">Pirate captain</div> -->
+          </div>
+          <ul class="skills">
+            <li class="pt-0 pb-0">
+              <span>Mode</span>
+              <span class="float-right text-medium bg-white fg-black" id="inverter-mode"></span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Temperature</span>
+              <span class="float-right text-medium bg-white fg-black" id="inverter-temp"></span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Serial Number</span>
+              <span class="float-right text-medium bg-white fg-black" id="inverter-serial"></span>
+            </li>
+            <li class="pt-0 pb-0">
+              <span>Firmware</span>
+              <span class="float-right text-medium bg-white fg-black" id="inverter-fw"></span>
+            </li>
+          </ul>
+        </div>
+
+
+
+
+      </div>
+      <div class="cell-sm-full cell-md-8 cell-lg-9">
+
+        <div class="row">
+          <div class="cell">
+            <div id="graph-container">
+              <!-- Append graph here -->
+            </div>
+            <div id="graphoverlay" class="text-center">
+              <div class="text-left drop-shadow" style="padding: 10px;z-index: 200; width: 140px; display: block; position: absolute; bottom:0px; right:20px; background: rgba(240, 240, 240, 0.5);">
+                Graph History:<br>
+                <select id="graphperiod" class="input-small" data-role="select" data-filter="false" data-on-change="loadData">
+                  <option value="8h">8 hr</option>
+                  <option value="1d">24 hr</option>
+                  <option value="1w">1 wk</option>
+                  <option value="30d">1 mn</option>
+                  <option value="52w">1 yr</option>
+                </select>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="cell">
+
+
+
+
+            <button class="button" id="collapse_toggle_2">Details</button>
+            <div class="pos-relative">
+              <div data-role="collapse" data-toggle-element="#collapse_toggle_2" data-collapsed="true">
+                <p class="p-1">
+                  <pre id="json"></pre>
+                </p>
+              </div>
+            </div>
 
           </div>
         </div>
       </div>
     </div>
 
-
-
-
-    <div class="batterybox">
-      <div class="battery-top"></div>
-      <progress id="progressbar" max="100" value="0"></progress>
-      <div class="progress-value" id="battLevel">0%</div>
-    </div>
 
 
     <script src="/plotly-latest.min.js"></script>
@@ -82,28 +187,8 @@
     <script src="/index.js"></script>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-      var socket = io();
-      socket.on('inverterData', function(data) {
 
-        console.log("inverterData", data);
-        document.getElementById("json").textContent = JSON.stringify(data, undefined, 2);
-        $("#battLevel").html(data.battery.capacity + "%")
-        var progressbar = $('#progressbar')
-        progressbar.val(data.battery.capacity)
-        if (parseFloat(data.battery.chargingcurrent) > 0) {
-          $(progressbar).after('<span class="bolt"><img src="lightning.png" alt=""></span>');
-        } else {
-
-          $(progressbar).after('');
-        }
-
-
-      });
-    </script>
 
   </body>
 
 </html>
-
-<pre id="json"></pre>
