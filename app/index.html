@@ -139,39 +139,7 @@
 
         <div class="row">
           <div class="cell">
-            <div id="graph-container">
-              <!-- Append graph here -->
-            </div>
-            <div id="graphoverlay" class="text-center">
-              <div class="text-left drop-shadow" style="padding: 10px;z-index: 200; width: 140px; display: block; position: absolute; bottom:0px; right:20px; background: rgba(240, 240, 240, 0.5);">
-                Graph History:<br>
-                <select id="graphperiod" class="input-small" data-role="select" data-filter="false" data-on-change="loadData">
-                  <option value="8h">8 hr</option>
-                  <option value="1d">24 hr</option>
-                  <option value="1w">1 wk</option>
-                  <option value="30d">1 mn</option>
-                  <option value="52w">1 yr</option>
-                </select>
-
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="cell">
-
-
-
-
-            <button class="button" id="collapse_toggle_2">Details</button>
-            <div class="pos-relative">
-              <div data-role="collapse" data-toggle-element="#collapse_toggle_2" data-collapsed="true">
-                <p class="p-1">
-                  <pre id="json"></pre>
-                </p>
-              </div>
-            </div>
-
+            <pre id="json"></pre>
           </div>
         </div>
       </div>
