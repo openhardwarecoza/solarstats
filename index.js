@@ -1,7 +1,7 @@
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = '1';
 // To see console.log output run with `DEBUGCONTROL=true electron .` or set environment variable for DEBUGCONTROL=true
 // debug_log debug overhead
-DEBUG = false;
+DEBUG = true;
 if (process.env.DEBUGCONTROL) {
   DEBUG = true;
   console.log("Console Debugging Enabled")
@@ -55,13 +55,60 @@ options = {
 
 var client = mqtt.connect('mqtt://192.168.0.245:1883', options)
 
+var initConfig = [
+  ["Inverter_mode", "", "solar-power"], //#1 = Power_On, 2 = Standby, 3 = Line, 4 = Battery, 5 = Fault, 6 = Power_Saving, 7 = Unknown["AC_grid_voltage", "V", "power-plug"],
+  ["AC_grid_voltage", "V", "power-plug"],
+  ["AC_grid_frequency", "Hz", "current-ac"],
+  ["AC_out_voltage", "V", "power-plug"],
+  ["AC_out_frequency", "Hz", "current-ac"],
+  ["PV_in_voltage", "V", "solar-panel-large"],
+  ["PV_in_current", "A", "solar-panel-large"],
+  ["PV_in_watts", "W", "solar-panel-large"],
+  ["PV_in_watthour", "Wh", "solar-panel-large"],
+  ["SCC_voltage", "V", "current-dc"],
+  ["Load_pct", "%", "brightness-percent"],
+  ["Load_watt", "W", "chart-bell-curve"],
+  ["Load_watthour", "Wh", "chart-bell-curve"],
+  ["Load_va", "VA", "chart-bell-curve"],
+  ["Bus_voltage", "V", "details"],
+  ["Heatsink_temperature", "", "details"],
+  ["Battery_capacity", "%", "battery-outline"],
+  ["Battery_voltage", "V", "battery-outline"],
+  ["Battery_charge_current", "A", "current-dc"],
+  ["Battery_discharge_current", "A", "current-dc"],
+  ["Load_status_on", "", "power"],
+  ["SCC_charge_on", "", "power"],
+  ["AC_charge_on", "", "power"],
+  ["Battery_recharge_voltage", "V", "current-dc"],
+  ["Battery_under_voltage", "V", "current-dc"],
+  ["Battery_bulk_voltage", "V", "current-dc"],
+  ["Battery_float_voltage", "V", "current-dc"],
+  ["Max_grid_charge_current", "A", "current-ac"],
+  ["Max_charge_current", "A", "current-ac"],
+  ["Out_source_priority", "", "grid"],
+  ["Charger_source_priority", "", "solar-power"],
+  ["Battery_redischarge_voltage", "V", "battery-negative"]
+]
+
 client.on('connect', function() {
-  client.subscribe('/homeassistant/inverter/command', function(err) {
+  client.subscribe('/homeassistant/sensor/inverter/command', function(err) {
     if (!err) {
-      client.publish('homeassistant/inverter/status', true)
+      for (i = 0; i > initConfig.length; i++) {
+        var string = `{
+            \"name\": \"inverter_` + initConfig[i][0] + `\",
+            \"unit_of_measurement\": \"` + initConfig[i][1] + `\",
+            \"state_topic\": \"homeassistant/sensor/inverter_` + initConfig[i][0] + `\",
+            \"icon\": \"mdi:` + initConfig[i][2] + `\",
+            \"id\": \"inverter_` + initConfig[i][0] + `\",
+
+        }`
+        client.publish("homeassistant/sensor/inverter_" + initConfig[i][0] + "/config", string);
+      }
+
     }
   })
 })
+
 
 client.on('message', function(topic, message) {
   // message is Buffer
@@ -78,6 +125,8 @@ var inverterData = {
     freq: 0
   },
   inverter: {
+    loadstatus: "",
+    invertermode: false,
     voltage: 0,
     freq: 0,
     apparentpwr: 0,
@@ -239,8 +288,10 @@ parser.on('data', function(data) {
     }
     if (statusstring[3] == 0) {
       debug_log("    Load Off")
+      inverterData.inverter.loadstatus = "Load Off"
     } else if (statusstring[3] == 0) {
       debug_log("    Load On")
+      inverterData.inverter.loadstatus = "Load On"
     }
     if (statusstring[4] == 1) {
       debug_log("    Float Charge", statusstring[4])
@@ -532,11 +583,6 @@ setInterval(function() {
     commandOrder++
   }
 
-  io.sockets.emit('inverterData', inverterData);
-
-}, 1000);
-
-setInterval(function() {
   var batteryamps = parseFloat(inverterData.battery.chargingcurrent) - parseFloat(inverterData.battery.dischargecurrent);
   var loadamps = parseFloat(inverterData.inverter.apparentpwr) / parseFloat(inverterData.inverter.voltage);
   // calculate grid load in amps
@@ -549,50 +595,45 @@ setInterval(function() {
     var gridamps = 0
   }
 
+}, 1000);
 
-  // influx.writePoints([{
-  //       measurement: 'load',
-  //       fields: {
-  //         volts: parseFloat(inverterData.inverter.voltage),
-  //         amps: loadamps
-  //       },
-  //       timestamp: Date.now(),
-  //     },
-  //     {
-  //       measurement: 'battery',
-  //       fields: {
-  //         volts: parseFloat(inverterData.battery.voltage),
-  //         amps: batteryamps
-  //       },
-  //       timestamp: Date.now(),
-  //     },
-  //     {
-  //       measurement: 'solar',
-  //       fields: {
-  //         volts: parseFloat(inverterData.pv.voltage),
-  //         amps: parseFloat(inverterData.pv.current)
-  //       },
-  //       timestamp: Date.now(),
-  //     },
-  //     {
-  //       measurement: 'grid',
-  //       fields: {
-  //         volts: inverterData.grid.voltage,
-  //         amps: gridamps
-  //       },
-  //       timestamp: Date.now(),
-  //     }
-  //   ], {
-  //     database: 'inverter_data',
-  //     precision: 'ms',
-  //   })
-  //   .catch(error => {
-  //     console.error(`Error saving data to InfluxDB! ${error.stack}`)
-  //   });
+setInterval(function() {
+  io.sockets.emit('inverterData', inverterData);
 
-
-
-}, 10000);
+  client.publish("homeassistant/sensor/inverter_Load_status_on", inverterData.inverter.loadstatus.toString());
+  client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.system.mode.toString());
+  client.publish("homeassistant/sensor/inverter_AC_grid_voltage", inverterData.grid.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_AC_grid_frequency", inverterData.grid.freq.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_AC_out_voltage", inverterData.inverter.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_AC_out_frequency", inverterData.inverter.freq.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_voltage", inverterData.pv.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_current", inverterData.pv.current.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_watts", (inverterData.pv.voltage * inverterData.pv.current).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_watthour", ((inverterData.pv.voltage * inverterData.pv.current) / (3600 / 10)).toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_SCC_voltage", inverterData.battery.sccvoltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Load_pct", inverterData.inverter.loadpercent.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Load_watt", inverterData.inverter.activepower.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Load_watthour", (inverterData.inverter.activepower / (3600 / 10)).toFixed(2).toString()); // 1 second
+  client.publish("homeassistant/sensor/inverter_Load_va", inverterData.inverter.apparentpwr.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Bus_voltage", inverterData.inverter.busvolts.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_capacity", inverterData.battery.capacity.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_voltage", inverterData.battery.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_charge_current", inverterData.battery.chargingcurrent.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_discharge_current", inverterData.battery.dischargecurrent.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_SCC_charge_on", inverterData.battery.chargemode.scc.toString());
+  client.publish("homeassistant/sensor/inverter_AC_charge_on", inverterData.battery.chargemode.ac.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_recharge_voltage", inverterData.system.settings.batteryRechargeVoltage.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_under_voltage", inverterData.system.settings.batteryUnderVoltage.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_bulk_voltage", inverterData.system.settings.batteryBulkVoltage.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_float_voltage", inverterData.system.settings.batteryFloatVoltage.toString());
+  client.publish("homeassistant/sensor/inverter_Max_grid_charge_current", inverterData.system.settings.maxACChargingCurrent.toString());
+  client.publish("homeassistant/sensor/inverter_Max_charge_current", inverterData.system.settings.maxChargingCurrent.toString());
+  client.publish("homeassistant/sensor/inverter_Out_source_priority", inverterData.system.settings.outputSourcePriority.toString());
+  client.publish("homeassistant/sensor/inverter_Charger_source_priority", inverterData.system.settings.chargerSourcePriority.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_redischarge_voltage", inverterData.system.settings.batteryReDischargeVoltage.toString());
+  console.log("----------------updated mqtt-------------------")
+}, 10000)
 
 
 // Axpert / EASUN / Inverter CRC Calculation:
