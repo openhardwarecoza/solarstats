@@ -38,16 +38,36 @@ const httpserver = http.listen(8080, '0.0.0.0', function() {
 io.attach(httpserver);
 app.use(express.static(path.join(__dirname, "app")));
 
-
-
-
-
 io.on('connection', function(socket) {
   socket.emit('welcome', inverterData);
   socket.on('my other event', function(data) {
     debug_log(data);
   });
 });
+
+var mqtt = require('mqtt')
+options = {
+  clientId: "inverter-bridge",
+  username: "mqtt",
+  password: "7szlyq",
+  clean: true
+};
+
+var client = mqtt.connect('mqtt://192.168.0.245:1883', options)
+
+client.on('connect', function() {
+  client.subscribe('presence', function(err) {
+    if (!err) {
+      client.publish('presence', 'Hello mqtt')
+    }
+  })
+})
+
+client.on('message', function(topic, message) {
+  // message is Buffer
+  console.log(message.toString())
+  client.end()
+})
 
 var sentBuffer = [];
 
