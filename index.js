@@ -30,25 +30,6 @@ var ip = require("ip");
 var fs = require('fs');
 var path = require("path");
 
-const Influx = require('influx');
-const influx = new Influx.InfluxDB({
-  host: 'localhost',
-  database: 'inverter_data'
-});
-
-influx.getDatabaseNames()
-  .then(names => {
-    if (!names.includes('inverter_data')) {
-      console.log("creating database")
-      return influx.createDatabase('inverter_data');
-    } else {
-      console.log("using existing database")
-    }
-  })
-  .catch(error => console.log({
-    error
-  }));
-
 
 const httpserver = http.listen(8080, '0.0.0.0', function() {
   debug_log('http:  listening on:' + ip.address() + ":" + 8080);
@@ -58,74 +39,7 @@ io.attach(httpserver);
 app.use(express.static(path.join(__dirname, "app")));
 
 
-// InfluxDB Data Fetch API
-app.get('/api/v1/inverter/solar', (request, response) => {
-  var period = "8h"
-  if (request.query.period) {
-    period = request.query.period
-  }
-  console.log(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "solar" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-  influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "solar" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-    .then(result => response.status(200).json(result))
-    .catch(error => response.status(500).json({
-      error
-    }));
-});
 
-app.get('/api/v1/inverter/grid', (request, response) => {
-  var period = "8h"
-  if (request.query.period) {
-    period = request.query.period
-  }
-  console.log(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "grid" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-  influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "grid" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-    .then(result => response.status(200).json(result))
-    .catch(error => response.status(500).json({
-      error
-    }));
-});
-
-app.get('/api/v1/inverter/battery', (request, response) => {
-  var period = "8h"
-  if (request.query.period) {
-    period = request.query.period
-  }
-  console.log(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "battery" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-  influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "battery" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-    .then(result => response.status(200).json(result))
-    .catch(error => response.status(500).json({
-      error
-    }));
-});
-
-app.get('/api/v1/inverter/load', (request, response) => {
-  var period = "8h"
-  if (request.query.period) {
-    period = request.query.period
-  }
-  console.log(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "load" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-  influx.query(`
-    SELECT MEAN("volts") as volts,MEAN("amps") as amps FROM "load" WHERE  time > now() - ` + period + ` GROUP BY time(10m) fill(none)
-    `)
-    .then(result => response.status(200).json(result))
-    .catch(error => response.status(500).json({
-      error
-    }));
-});
 
 
 io.on('connection', function(socket) {
@@ -615,54 +529,47 @@ setInterval(function() {
   }
 
 
-  influx.writePoints([{
-        measurement: 'load',
-        fields: {
-          volts: parseFloat(inverterData.inverter.voltage),
-          amps: loadamps
-        },
-        timestamp: Date.now(),
-      },
-      {
-        measurement: 'battery',
-        fields: {
-          volts: parseFloat(inverterData.battery.voltage),
-          amps: batteryamps
-        },
-        timestamp: Date.now(),
-      },
-      {
-        measurement: 'solar',
-        fields: {
-          volts: parseFloat(inverterData.pv.voltage),
-          amps: parseFloat(inverterData.pv.current)
-        },
-        timestamp: Date.now(),
-      },
-      {
-        measurement: 'grid',
-        fields: {
-          volts: inverterData.grid.voltage,
-          amps: gridamps
-        },
-        timestamp: Date.now(),
-      }
-    ], {
-      database: 'inverter_data',
-      precision: 'ms',
-    })
-    .catch(error => {
-      console.error(`Error saving data to InfluxDB! ${error.stack}`)
-    });
+  // influx.writePoints([{
+  //       measurement: 'load',
+  //       fields: {
+  //         volts: parseFloat(inverterData.inverter.voltage),
+  //         amps: loadamps
+  //       },
+  //       timestamp: Date.now(),
+  //     },
+  //     {
+  //       measurement: 'battery',
+  //       fields: {
+  //         volts: parseFloat(inverterData.battery.voltage),
+  //         amps: batteryamps
+  //       },
+  //       timestamp: Date.now(),
+  //     },
+  //     {
+  //       measurement: 'solar',
+  //       fields: {
+  //         volts: parseFloat(inverterData.pv.voltage),
+  //         amps: parseFloat(inverterData.pv.current)
+  //       },
+  //       timestamp: Date.now(),
+  //     },
+  //     {
+  //       measurement: 'grid',
+  //       fields: {
+  //         volts: inverterData.grid.voltage,
+  //         amps: gridamps
+  //       },
+  //       timestamp: Date.now(),
+  //     }
+  //   ], {
+  //     database: 'inverter_data',
+  //     precision: 'ms',
+  //   })
+  //   .catch(error => {
+  //     console.error(`Error saving data to InfluxDB! ${error.stack}`)
+  //   });
 
 
-  // influx.query(`
-  //   select * from solar
-  // `)
-  //   .then(result => console.log(result))
-  //   .catch(error => console.log({
-  //     error
-  //   }));
 
 }, 10000);
 
