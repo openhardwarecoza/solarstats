@@ -1,7 +1,4 @@
 $(document).ready(function() {
-
-  setInterval(loadData, 60000)
-
   var socket = io();
 
   socket.on('inverterData', function(data) {
