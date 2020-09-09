@@ -56,9 +56,9 @@ options = {
 var client = mqtt.connect('mqtt://192.168.0.245:1883', options)
 
 client.on('connect', function() {
-  client.subscribe('presence', function(err) {
+  client.subscribe('/homeassistant/inverter/command', function(err) {
     if (!err) {
-      client.publish('presence', 'Hello mqtt')
+      client.publish('homeassistant/inverter/status', true)
     }
   })
 })
