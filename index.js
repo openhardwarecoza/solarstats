@@ -93,14 +93,12 @@ var initConfig = [
 client.on('connect', function() {
   client.subscribe('/homeassistant/sensor/inverter/command', function(err) {
     if (!err) {
-      for (i = 0; i > initConfig.length; i++) {
+      for (i = 0; i < initConfig.length; i++) {
         var string = `{
             \"name\": \"inverter_` + initConfig[i][0] + `\",
             \"unit_of_measurement\": \"` + initConfig[i][1] + `\",
             \"state_topic\": \"homeassistant/sensor/inverter_` + initConfig[i][0] + `\",
-            \"icon\": \"mdi:` + initConfig[i][2] + `\",
-            \"id\": \"inverter_` + initConfig[i][0] + `\",
-
+            \"icon\": \"mdi:` + initConfig[i][2] + `\"
         }`
         client.publish("homeassistant/sensor/inverter_" + initConfig[i][0] + "/config", string);
       }
@@ -599,6 +597,8 @@ setInterval(function() {
 
 setInterval(function() {
   io.sockets.emit('inverterData', inverterData);
+
+
 
   client.publish("homeassistant/sensor/inverter_Load_status_on", inverterData.inverter.loadstatus.toString());
   client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.system.mode.toString());
