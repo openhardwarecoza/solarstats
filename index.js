@@ -233,37 +233,37 @@ parser.on('data', function(data) {
     var generalstatus = data.toString().replace(/[^\w.]+/g, " ").split(" ");
     debug_log(JSON.stringify(generalstatus))
     debug_log("Grid Voltage: ", generalstatus[1]);
-    inverterData.grid.voltage = parseFloat(generalstatus[1])
+    inverterData.grid.voltage = parseFloat(generalstatus[1]).toFixed(1)
     debug_log("Grid frequency: ", generalstatus[2]);
-    inverterData.grid.freq = parseFloat(generalstatus[2])
+    inverterData.grid.freq = parseFloat(generalstatus[2]).toFixed(1)
     debug_log("AC output voltage : ", generalstatus[3]);
-    inverterData.inverter.voltage = parseFloat(generalstatus[3])
+    inverterData.inverter.voltage = parseFloat(generalstatus[3]).toFixed(1)
     debug_log("AC output frequency: ", generalstatus[4]);
-    inverterData.inverter.freq = parseFloat(generalstatus[4])
+    inverterData.inverter.freq = parseFloat(generalstatus[4]).toFixed(1)
     debug_log("AC output apparent power: ", generalstatus[5]);
-    inverterData.inverter.apparentpwr = parseFloat(generalstatus[5])
+    inverterData.inverter.apparentpwr = parseFloat(generalstatus[5]).toFixed(1)
     debug_log("AC output active power: ", generalstatus[6]);
-    inverterData.inverter.activepower = parseFloat(generalstatus[6])
+    inverterData.inverter.activepower = parseFloat(generalstatus[6]).toFixed(1)
     debug_log("Output load percent : ", generalstatus[7]);
-    inverterData.inverter.loadpercent = parseFloat(generalstatus[7])
+    inverterData.inverter.loadpercent = parseFloat(generalstatus[7]).toFixed(1)
     debug_log("BUS voltage: ", generalstatus[8]);
-    inverterData.inverter.busvolts = parseFloat(generalstatus[8])
+    inverterData.inverter.busvolts = parseFloat(generalstatus[8]).toFixed(1)
     debug_log("Battery voltage: ", generalstatus[9]);
-    inverterData.battery.voltage = parseFloat(generalstatus[9])
+    inverterData.battery.voltage = parseFloat(generalstatus[9]).toFixed(1)
     debug_log("Battery charging current: ", generalstatus[10]);
-    inverterData.battery.chargingcurrent = parseFloat(generalstatus[10])
+    inverterData.battery.chargingcurrent = parseFloat(generalstatus[10]).toFixed(1)
     debug_log("Battery discharge current: ", generalstatus[16]);
-    inverterData.battery.dischargecurrent = parseFloat(generalstatus[16])
+    inverterData.battery.dischargecurrent = parseFloat(generalstatus[16]).toFixed(1)
     debug_log("Battery capacity: ", generalstatus[11]);
-    inverterData.battery.capacity = parseFloat(generalstatus[11])
+    inverterData.battery.capacity = parseFloat(generalstatus[11]).toFixed(1)
     debug_log("Inverter heat sink temperature: ", generalstatus[12]);
-    inverterData.inverter.heatsinktemp = parseFloat(generalstatus[12])
+    inverterData.inverter.heatsinktemp = parseFloat(generalstatus[12]).toFixed(1)
     debug_log("PV Input current for battery. : ", generalstatus[13]);
-    inverterData.pv.current = parseFloat(generalstatus[13])
+    inverterData.pv.current = parseFloat(generalstatus[13]).toFixed(1)
     debug_log("PV Input voltage 1: ", generalstatus[14]);
-    inverterData.pv.voltage = parseFloat(generalstatus[14])
+    inverterData.pv.voltage = parseFloat(generalstatus[14]).toFixed(1)
     debug_log("Battery voltage from SCC : ", generalstatus[15]);
-    inverterData.battery.sccvoltage = parseFloat(generalstatus[15])
+    inverterData.battery.sccvoltage = parseFloat(generalstatus[15]).toFixed(1)
     debug_log("Device status: ", generalstatus[17]);
     var statusstring = generalstatus[17].split("")
     debug_log(JSON.stringify(statusstring));
@@ -602,23 +602,23 @@ setInterval(function() {
 
   client.publish("homeassistant/sensor/inverter_Load_status_on", inverterData.inverter.loadstatus.toString());
   client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.system.mode.toString());
-  client.publish("homeassistant/sensor/inverter_AC_grid_voltage", inverterData.grid.voltage.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_AC_grid_frequency", inverterData.grid.freq.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_AC_out_voltage", inverterData.inverter.voltage.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_AC_out_frequency", inverterData.inverter.freq.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_PV_in_voltage", inverterData.pv.voltage.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_PV_in_current", inverterData.pv.current.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_AC_grid_voltage", inverterData.grid.voltage.toString());
+  client.publish("homeassistant/sensor/inverter_AC_grid_frequency", inverterData.grid.freq.toString());
+  client.publish("homeassistant/sensor/inverter_AC_out_voltage", inverterData.inverter.voltage.toString());
+  client.publish("homeassistant/sensor/inverter_AC_out_frequency", inverterData.inverter.freq.toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_voltage", inverterData.pv.voltage.toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_current", inverterData.pv.current.toString());
   client.publish("homeassistant/sensor/inverter_PV_in_watts", (inverterData.pv.voltage * inverterData.pv.current).toString());
   client.publish("homeassistant/sensor/inverter_PV_in_watthour", ((inverterData.pv.voltage * inverterData.pv.current) / (3600 / 10)).toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_SCC_voltage", inverterData.battery.sccvoltage.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_Load_pct", inverterData.inverter.loadpercent.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_Load_watt", inverterData.inverter.activepower.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_SCC_voltage", inverterData.battery.sccvoltage.toString());
+  client.publish("homeassistant/sensor/inverter_Load_pct", inverterData.inverter.loadpercent.toString());
+  client.publish("homeassistant/sensor/inverter_Load_watt", inverterData.inverter.activepower.toString());
   client.publish("homeassistant/sensor/inverter_Load_watthour", (inverterData.inverter.activepower / (3600 / 10)).toFixed(2).toString()); // 1 second
-  client.publish("homeassistant/sensor/inverter_Load_va", inverterData.inverter.apparentpwr.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_Bus_voltage", inverterData.inverter.busvolts.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_Battery_capacity", inverterData.battery.capacity.toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_Battery_voltage", inverterData.battery.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Load_va", inverterData.inverter.apparentpwr.toString());
+  client.publish("homeassistant/sensor/inverter_Bus_voltage", inverterData.inverter.busvolts.toString());
+  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_capacity", inverterData.battery.capacity.toString());
+  client.publish("homeassistant/sensor/inverter_Battery_voltage", inverterData.battery.voltage.toString());
   client.publish("homeassistant/sensor/inverter_Battery_charge_current", inverterData.battery.chargingcurrent.toFixed(2).toString());
   client.publish("homeassistant/sensor/inverter_Battery_discharge_current", inverterData.battery.dischargecurrent.toFixed(2).toString());
   client.publish("homeassistant/sensor/inverter_SCC_charge_on", inverterData.battery.chargemode.scc.toString());
@@ -633,7 +633,7 @@ setInterval(function() {
   client.publish("homeassistant/sensor/inverter_Charger_source_priority", inverterData.system.settings.chargerSourcePriority.toString());
   client.publish("homeassistant/sensor/inverter_Battery_redischarge_voltage", inverterData.system.settings.batteryReDischargeVoltage.toString());
   console.log("----------------updated mqtt-------------------")
-}, 10000)
+}, 1000)
 
 
 // Axpert / EASUN / Inverter CRC Calculation:
