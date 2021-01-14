@@ -616,7 +616,7 @@ setInterval(function() {
   client.publish("homeassistant/sensor/inverter_Load_watthour", (inverterData.inverter.activepower / (3600 / 10)).toFixed(2).toString()); // 1 second
   client.publish("homeassistant/sensor/inverter_Load_va", inverterData.inverter.apparentpwr.toString());
   client.publish("homeassistant/sensor/inverter_Bus_voltage", inverterData.inverter.busvolts.toString());
-  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp.toString());
+  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp);
   client.publish("homeassistant/sensor/inverter_Battery_capacity", inverterData.battery.capacity.toString());
   client.publish("homeassistant/sensor/inverter_Battery_voltage", inverterData.battery.voltage.toString());
   client.publish("homeassistant/sensor/inverter_Battery_charge_current", inverterData.battery.chargingcurrent.toString());
