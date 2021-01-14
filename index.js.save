@@ -603,24 +603,24 @@ setInterval(function() {
   client.publish("homeassistant/sensor/inverter_Load_status_on", inverterData.inverter.loadstatus.toString());
   client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.system.mode.toString());
   client.publish("homeassistant/sensor/inverter_AC_grid_voltage", inverterData.grid.voltage.toString());
-  client.publish("homeassistant/sensor/inverter_AC_grid_frequency", inverterData.grid.freq.toString());
-  client.publish("homeassistant/sensor/inverter_AC_out_voltage", inverterData.inverter.voltage.toString());
-  client.publish("homeassistant/sensor/inverter_AC_out_frequency", inverterData.inverter.freq.toString());
-  client.publish("homeassistant/sensor/inverter_PV_in_voltage", inverterData.pv.voltage.toString());
-  client.publish("homeassistant/sensor/inverter_PV_in_current", inverterData.pv.current.toString());
-  client.publish("homeassistant/sensor/inverter_PV_in_watts", (inverterData.pv.voltage * inverterData.pv.current).toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_AC_grid_frequency", inverterData.grid.freq..toString());
+  client.publish("homeassistant/sensor/inverter_AC_out_voltage", inverterData.inverter.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_AC_out_frequency", inverterData.inverter.freq.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_voltage", inverterData.pv.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_current", inverterData.pv.current.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_PV_in_watts", (inverterData.pv.voltage * inverterData.pv.current).toString());
   client.publish("homeassistant/sensor/inverter_PV_in_watthour", ((inverterData.pv.voltage * inverterData.pv.current) / (3600 / 10)).toFixed(2).toString());
-  client.publish("homeassistant/sensor/inverter_SCC_voltage", inverterData.battery.sccvoltage.toString());
-  client.publish("homeassistant/sensor/inverter_Load_pct", inverterData.inverter.loadpercent.toString());
-  client.publish("homeassistant/sensor/inverter_Load_watt", inverterData.inverter.activepower.toString());
+  client.publish("homeassistant/sensor/inverter_SCC_voltage", inverterData.battery.sccvoltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Load_pct", inverterData.inverter.loadpercent.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Load_watt", inverterData.inverter.activepower.toFixed(2).toString());
   client.publish("homeassistant/sensor/inverter_Load_watthour", (inverterData.inverter.activepower / (3600 / 10)).toFixed(2).toString()); // 1 second
-  client.publish("homeassistant/sensor/inverter_Load_va", inverterData.inverter.apparentpwr.toString());
-  client.publish("homeassistant/sensor/inverter_Bus_voltage", inverterData.inverter.busvolts.toString());
-  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp.toString());
-  client.publish("homeassistant/sensor/inverter_Battery_capacity", inverterData.battery.capacity.toString());
-  client.publish("homeassistant/sensor/inverter_Battery_voltage", inverterData.battery.voltage.toString());
-  client.publish("homeassistant/sensor/inverter_Battery_charge_current", inverterData.battery.chargingcurrent.toString());
-  client.publish("homeassistant/sensor/inverter_Battery_discharge_current", inverterData.battery.dischargecurrent.toString());
+  client.publish("homeassistant/sensor/inverter_Load_va", inverterData.inverter.apparentpwr.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Bus_voltage", inverterData.inverter.busvolts.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Heatsink_temperature", inverterData.inverter.heatsinktemp.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_capacity", inverterData.battery.capacity.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_voltage", inverterData.battery.voltage.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_charge_current", inverterData.battery.chargingcurrent.toFixed(2).toString());
+  client.publish("homeassistant/sensor/inverter_Battery_discharge_current", inverterData.battery.dischargecurrent.toFixed(2).toString());
   client.publish("homeassistant/sensor/inverter_SCC_charge_on", inverterData.battery.chargemode.scc.toString());
   client.publish("homeassistant/sensor/inverter_AC_charge_on", inverterData.battery.chargemode.ac.toString());
   client.publish("homeassistant/sensor/inverter_Battery_recharge_voltage", inverterData.system.settings.batteryRechargeVoltage.toString());
@@ -633,7 +633,7 @@ setInterval(function() {
   client.publish("homeassistant/sensor/inverter_Charger_source_priority", inverterData.system.settings.chargerSourcePriority.toString());
   client.publish("homeassistant/sensor/inverter_Battery_redischarge_voltage", inverterData.system.settings.batteryReDischargeVoltage.toString());
   console.log("----------------updated mqtt-------------------")
-}, 1000)
+}, 10000)
 
 
 // Axpert / EASUN / Inverter CRC Calculation:
