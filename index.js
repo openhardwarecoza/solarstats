@@ -19,8 +19,8 @@ process.on("uncaughtException", (err) => {
 
 console.log("Starting " + require('./package').name + " version " + require('./package').version)
 
-const SerialPort = require('serialport')
-const Readline = require('@serialport/parser-readline')
+//const SerialPort = require('serialport')
+//const Readline = require('@serialport/parser-readline')
 var express = require("express");
 var app = express();
 var http = require("http").Server(app);
@@ -29,6 +29,10 @@ var io = new ioServer();
 var ip = require("ip");
 var fs = require('fs');
 var path = require("path");
+
+var HID = require('node-hid');
+var device = new HID.HID(1637, 20833)
+let output = '';
 
 
 const httpserver = http.listen(8080, '0.0.0.0', function() {
@@ -48,8 +52,8 @@ io.on('connection', function(socket) {
 var mqtt = require('mqtt')
 options = {
   clientId: "inverter-bridge",
-  username: "mqtt",
-  password: "7szlyq",
+  username: "homeassistant",
+  password: "ahp7ahkee8thohw1taen2kohvi4ooy8aesaiJ9mozeep8tei9achohX9quuapeix",
   clean: true
 };
 
@@ -91,15 +95,29 @@ var initConfig = [
 ]
 
 client.on('connect', function() {
-  client.subscribe('/homeassistant/sensor/inverter/command', function(err) {
+  console.log("Connected MQTT");
+  client.subscribe('/homeassistant/sensor/sensor.inverter/command', function(err) {
     if (!err) {
       for (i = 0; i < initConfig.length; i++) {
-        var string = `{
-            \"name\": \"inverter_` + initConfig[i][0] + `\",
-            \"unit_of_measurement\": \"` + initConfig[i][1] + `\",
-            \"state_topic\": \"homeassistant/sensor/inverter_` + initConfig[i][0] + `\",
-            \"icon\": \"mdi:` + initConfig[i][2] + `\"
-        }`
+
+
+
+        if (initConfig[i][0] == "Load_watt" || initConfig[i][0] == "PV_in_watts") {
+          var string = `{
+              \"name\": \"sensor.inverter_` + initConfig[i][0] + `\",
+              \"unit_of_measurement\": \"` + initConfig[i][1] + `\",
+              \"device_class\": \"power\",
+              \"state_topic\": \"homeassistant/sensor/inverter_` + initConfig[i][0] + `\",
+              \"icon\": \"mdi:` + initConfig[i][2] + `\"
+          }`
+        } else {
+          var string = `{
+              \"name\": \"sensor.inverter_` + initConfig[i][0] + `\",
+              \"unit_of_measurement\": \"` + initConfig[i][1] + `\",
+              \"state_topic\": \"homeassistant/sensor/inverter_` + initConfig[i][0] + `\",
+              \"icon\": \"mdi:` + initConfig[i][2] + `\"
+          }`
+        }
         client.publish("homeassistant/sensor/inverter_" + initConfig[i][0] + "/config", string);
       }
 
@@ -116,6 +134,7 @@ client.on('message', function(topic, message) {
 })
 
 var sentBuffer = [];
+var incomingBuffer;
 
 var inverterData = {
   grid: {
@@ -216,346 +235,372 @@ var inverterData = {
 }
 
 
-const port = new SerialPort('/dev/ttyUSB0', {
-  baudRate: 2400,
-  dataBits: 8,
-  stopBits: 1,
-  parity: 'none',
-})
+//const port = new SerialPort('/dev/hidraw0', {
+//  baudRate: 2400,
+//  dataBits: 8,
+//  stopBits: 1,
+//  parity: 'none',
+//})
 
-const parser = port.pipe(new Readline({
-  delimiter: '\r'
-}))
+//const parser = port.pipe(new Readline({
+//  delimiter: '\r'
+//}))
 
-parser.on('data', function(data) {
-  command = sentBuffer.shift();
-  if (command == "QPIGS") {
-    var generalstatus = data.toString().replace(/[^\w.]+/g, " ").split(" ");
-    debug_log(JSON.stringify(generalstatus))
-    debug_log("Grid Voltage: ", generalstatus[1]);
-    inverterData.grid.voltage = parseFloat(generalstatus[1]).toFixed(1)
-    debug_log("Grid frequency: ", generalstatus[2]);
-    inverterData.grid.freq = parseFloat(generalstatus[2]).toFixed(1)
-    debug_log("AC output voltage : ", generalstatus[3]);
-    inverterData.inverter.voltage = parseFloat(generalstatus[3]).toFixed(1)
-    debug_log("AC output frequency: ", generalstatus[4]);
-    inverterData.inverter.freq = parseFloat(generalstatus[4]).toFixed(1)
-    debug_log("AC output apparent power: ", generalstatus[5]);
-    inverterData.inverter.apparentpwr = parseFloat(generalstatus[5]).toFixed(1)
-    debug_log("AC output active power: ", generalstatus[6]);
-    inverterData.inverter.activepower = parseFloat(generalstatus[6]).toFixed(1)
-    debug_log("Output load percent : ", generalstatus[7]);
-    inverterData.inverter.loadpercent = parseFloat(generalstatus[7]).toFixed(1)
-    debug_log("BUS voltage: ", generalstatus[8]);
-    inverterData.inverter.busvolts = parseFloat(generalstatus[8]).toFixed(1)
-    debug_log("Battery voltage: ", generalstatus[9]);
-    inverterData.battery.voltage = parseFloat(generalstatus[9]).toFixed(1)
-    debug_log("Battery charging current: ", generalstatus[10]);
-    inverterData.battery.chargingcurrent = parseFloat(generalstatus[10]).toFixed(1)
-    debug_log("Battery discharge current: ", generalstatus[16]);
-    inverterData.battery.dischargecurrent = parseFloat(generalstatus[16]).toFixed(1)
-    debug_log("Battery capacity: ", generalstatus[11]);
-    inverterData.battery.capacity = parseFloat(generalstatus[11]).toFixed(1)
-    debug_log("Inverter heat sink temperature: ", generalstatus[12]);
-    inverterData.inverter.heatsinktemp = parseFloat(generalstatus[12]).toFixed(1)
-    debug_log("PV Input current for battery. : ", generalstatus[13]);
-    inverterData.pv.current = parseFloat(generalstatus[13]).toFixed(1)
-    debug_log("PV Input voltage 1: ", generalstatus[14]);
-    inverterData.pv.voltage = parseFloat(generalstatus[14]).toFixed(1)
-    debug_log("Battery voltage from SCC : ", generalstatus[15]);
-    inverterData.battery.sccvoltage = parseFloat(generalstatus[15]).toFixed(1)
-    debug_log("Device status: ", generalstatus[17]);
-    var statusstring = generalstatus[17].split("")
-    debug_log(JSON.stringify(statusstring));
-    if (statusstring[0] == 0) {
-      debug_log("    add SBU priority version: no")
-    } else if (statusstring[1] == 1) {
-      debug_log("    add SBU priority version: yes")
+device.on('data', function(data) {
+
+
+  const chunk = data.toString('utf8');
+
+  // Concatenate the received chunk to the output
+  output += chunk;
+
+  // Check if a newline character is present in the output
+  if (output.includes('\r')) {
+    // Split the output by newline
+    const lines = output.split('\r');
+
+    // Remove the last element from the lines array (incomplete line)
+    const lastLine = lines.pop();
+
+    // Process each complete line
+    for (const line of lines) {
+      // Respond to each line
+      console.log('Received line:', line);
+      command = sentBuffer.shift();
+      if (command == "QPIGS") {
+        var generalstatus = line.toString().replace(/[^\w.]+/g, " ").split(" ");
+        debug_log(JSON.stringify(generalstatus))
+        debug_log("Grid Voltage: ", generalstatus[1]);
+        inverterData.grid.voltage = parseFloat(generalstatus[1]).toFixed(1)
+        debug_log("Grid frequency: ", generalstatus[2]);
+        inverterData.grid.freq = parseFloat(generalstatus[2]).toFixed(1)
+        debug_log("AC output voltage : ", generalstatus[3]);
+        inverterData.inverter.voltage = parseFloat(generalstatus[3]).toFixed(1)
+        debug_log("AC output frequency: ", generalstatus[4]);
+        inverterData.inverter.freq = parseFloat(generalstatus[4]).toFixed(1)
+        debug_log("AC output apparent power: ", generalstatus[5]);
+        inverterData.inverter.apparentpwr = parseFloat(generalstatus[5]).toFixed(1)
+        debug_log("AC output active power: ", generalstatus[6]);
+        inverterData.inverter.activepower = parseFloat(generalstatus[6]).toFixed(1)
+        debug_log("Output load percent : ", generalstatus[7]);
+        inverterData.inverter.loadpercent = parseFloat(generalstatus[7]).toFixed(1)
+        debug_log("BUS voltage: ", generalstatus[8]);
+        inverterData.inverter.busvolts = parseFloat(generalstatus[8]).toFixed(1)
+        debug_log("Battery voltage: ", generalstatus[9]);
+        inverterData.battery.voltage = parseFloat(generalstatus[9]).toFixed(1)
+        debug_log("Battery charging current: ", generalstatus[10]);
+        inverterData.battery.chargingcurrent = parseFloat(generalstatus[10]).toFixed(1)
+        debug_log("Battery discharge current: ", generalstatus[16]);
+        inverterData.battery.dischargecurrent = parseFloat(generalstatus[16]).toFixed(1)
+        debug_log("Battery capacity: ", generalstatus[11]);
+        inverterData.battery.capacity = parseFloat(generalstatus[11]).toFixed(1)
+        debug_log("Inverter heat sink temperature: ", generalstatus[12]);
+        inverterData.inverter.heatsinktemp = parseFloat(generalstatus[12]).toFixed(1)
+        debug_log("PV Input current for battery. : ", generalstatus[13]);
+        inverterData.pv.current = parseFloat(generalstatus[13]).toFixed(1)
+        debug_log("PV Input voltage 1: ", generalstatus[14]);
+        inverterData.pv.voltage = parseFloat(generalstatus[14]).toFixed(1)
+        debug_log("Battery voltage from SCC : ", generalstatus[15]);
+        inverterData.battery.sccvoltage = parseFloat(generalstatus[15]).toFixed(1)
+        debug_log("Device status: ", generalstatus[17]);
+        var statusstring = generalstatus[17].split("")
+        debug_log(JSON.stringify(statusstring));
+        if (statusstring[0] == 0) {
+          debug_log("    add SBU priority version: no")
+        } else if (statusstring[1] == 1) {
+          debug_log("    add SBU priority version: yes")
+        }
+
+        if (statusstring[1] == 0) {
+          debug_log("    configuration status unchanged")
+        } else if (statusstring[1] == 1) {
+          debug_log("    configuration status changed")
+        }
+
+        if (statusstring[2] == 1) {
+          debug_log("    SCC firmware version Updated")
+        } else if (statusstring[2] == 0) {
+          debug_log("    SCC firmware version unchanged")
+        }
+        if (statusstring[3] == 0) {
+          debug_log("    Load Off")
+          inverterData.inverter.loadstatus = "Load Off"
+        } else if (statusstring[3] == 0) {
+          debug_log("    Load On")
+          inverterData.inverter.loadstatus = "Load On"
+        }
+        if (statusstring[4] == 1) {
+          debug_log("    Float Charge", statusstring[4])
+        } else if (statusstring[4] == 0) {
+          debug_log("    Float Charge", statusstring[4])
+        }
+
+        if (statusstring[5] + statusstring[6] + statusstring[7] == "000") {
+          debug_log("    Charge: none")
+          inverterData.battery.chargemode.scc = false;
+          inverterData.battery.chargemode.ac = false;
+        }
+        if (statusstring[5] + statusstring[6] + statusstring[7] == "110") {
+          debug_log("    Charge: scc")
+          inverterData.battery.chargemode.scc = true;
+          inverterData.battery.chargemode.ac = false;
+        }
+        if (statusstring[5] + statusstring[6] + statusstring[7] == "101") {
+          debug_log("    Charge: ac")
+          inverterData.battery.chargemode.scc = false;
+          inverterData.battery.chargemode.ac = true;
+        }
+        if (statusstring[5] + statusstring[6] + statusstring[7] == "111") {
+          debug_log("    Charge: scc and ac")
+          inverterData.battery.chargemode.scc = true;
+          inverterData.battery.chargemode.ac = true;
+        }
+      } else if (command == "QMOD") {
+        var devicemode = line.toString().replace(/[^\w.]+/g, " ").split(" ");
+        var mode = ""
+        if (devicemode[1] == "P") {
+          mode += "Power On Mode"
+          inverterData.system.mode = "Power On Mode"
+        }
+        if (devicemode[1] == "S") {
+          mode += "Standby Mode"
+          inverterData.system.mode = "Standby Mode"
+        }
+        if (devicemode[1] == "L") {
+          mode += "Line Mode"
+          inverterData.system.mode = "Line Mode"
+        }
+        if (devicemode[1] == "B") {
+          mode += "Battery Mode"
+          inverterData.system.mode = "Battery Mode"
+        }
+        if (devicemode[1] == "F") {
+          mode += "Fault Mode"
+          inverterData.system.mode = "Fault Mode"
+        }
+        if (devicemode[1] == "H") {
+          mode += "Power Saving Mode"
+          inverterData.system.mode = "Power Saving Mode"
+        }
+        debug_log("Device Mode: ", mode)
+
+      } else if (command == "QPIRI") {
+        var rating = line.toString().replace(/[^\w.]+/g, " ").split(" ");
+        debug_log(rating)
+        debug_log("Grid rating voltage : ", rating[1]);
+        inverterData.system.settings.gridVoltRating = rating[1]
+        debug_log("Grid rating current : ", rating[2]);
+        inverterData.system.settings.gridCurrentRating = rating[2]
+        debug_log("AC output rating voltage : ", rating[3]);
+        inverterData.system.settings.acOutputVoltRating = rating[3]
+        debug_log("AC output rating frequency : ", rating[4]);
+        inverterData.system.settings.acOutputCFreqRating = rating[4]
+        debug_log("AC output rating current : ", rating[5]);
+        inverterData.system.settings.acOutputCurrentRating = rating[5]
+        debug_log("AC output rating apparent power: ", rating[6]);
+        inverterData.system.settings.acOutputApparentPowerRating = rating[6]
+        debug_log("AC output rating active power : ", rating[7]);
+        inverterData.system.settings.acOutputActivePowerRating = rating[7]
+        debug_log("Battery rating voltage : ", rating[8]);
+        inverterData.system.settings.batteryVoltRating = rating[8]
+        debug_log("Battery re-charge voltage : ", rating[9]);
+        inverterData.system.settings.batteryRechargeVoltage = rating[9]
+        debug_log("Battery under voltage: ", rating[10]);
+        inverterData.system.settings.batteryUnderVoltage = rating[10]
+        debug_log("Battery bulk voltage: ", rating[11]);
+        inverterData.system.settings.batteryBulkVoltage = rating[11]
+        debug_log("Battery float voltage : ", rating[12]);
+        inverterData.system.settings.batteryFloatVoltage = rating[12]
+        debug_log("Battery type : ", rating[13]);
+        inverterData.system.settings.batteryType = rating[13]
+        debug_log("Current max AC charging current: ", rating[14]);
+        inverterData.system.settings.maxACChargingCurrent = rating[14]
+        debug_log("Current max charging current: ", rating[15]);
+        inverterData.system.settings.maxChargingCurrent = rating[15]
+        debug_log("Input voltage range: ", rating[16]);
+        inverterData.system.settings.inputVoltageRange = rating[16]
+        debug_log("Output source priority: ", rating[17]);
+        inverterData.system.settings.outputSourcePriority = rating[17]
+        debug_log("Charger source priority : ", rating[18]);
+        inverterData.system.settings.chargerSourcePriority = rating[18]
+        debug_log("Parallel max num: ", rating[19]);
+        inverterData.system.settings.parallelMaxNum = rating[19]
+        debug_log("Machine type : ", rating[20]);
+        inverterData.system.settings.machineType = rating[20]
+        debug_log("Topology: ", rating[21]);
+        inverterData.system.settings.topology = rating[21]
+        debug_log("Output mode: ", rating[22]);
+        inverterData.system.settings.outputMode = rating[22]
+        debug_log("Battery re-discharge voltage : ", rating[23]);
+        inverterData.system.settings.batteryReDischargeVoltage = rating[23]
+        debug_log("PV OK condition for parallel: ", rating[24]);
+        inverterData.system.settings.pvOKparallel = rating[24]
+        debug_log("PV power balance: ", rating[25]);
+        inverterData.system.settings.pvPowerBalance = rating[25]
+      } else if (command == "QPIWS") {
+        var warnings = line.toString().replace(/[^\w.]+/g, " ").split(" ")[1].split("");
+        debug_log("Faults:")
+
+        for (var fault in inverterData.system.faults) {
+          // skip loop if the property is from prototype
+          if (!inverterData.system.faults.hasOwnProperty(fault)) continue;
+
+          // reset status so we can set it from data
+          inverterData.system.faults[fault] = false;
+        }
+
+        if (warnings[1] == 1) {
+          debug_log("Inverter Fault")
+          inverterData.system.faults.inverter = true
+        }
+        if (warnings[2] == 1) {
+          debug_log("Bus Over Fault")
+          inverterData.system.faults.busOver = true
+        }
+        if (warnings[3] == 1) {
+          debug_log("Bus Under Fault")
+          inverterData.system.faults.busUnder = true
+        }
+        if (warnings[4] == 1) {
+          debug_log("Bus Soft Fault")
+          inverterData.system.faults.busSoft = true
+        }
+        if (warnings[5] == 1) {
+          debug_log("Line Fail Fault")
+          inverterData.system.faults.lineFail = true
+        }
+        if (warnings[6] == 1) {
+          debug_log("OPV Short Fault")
+          inverterData.system.faults.opvShort = true
+        }
+        if (warnings[7] == 1) {
+          debug_log("Inverter Voltage Low Fault")
+          inverterData.system.faults.invVoltLow = true
+        }
+        if (warnings[8] == 1) {
+          debug_log("Inverter Voltage High Fault")
+          inverterData.system.faults.invVoltHigh = true
+        }
+        if (warnings[9] == 1) {
+          debug_log("Over Temp Fault")
+          inverterData.system.faults.overTemp = true
+        }
+        if (warnings[10] == 1) {
+          debug_log("Fan Locked Fault")
+          inverterData.system.faults.fanLocked = true
+        }
+        if (warnings[11] == 1) {
+          debug_log("Battery Voltage High Fault")
+          inverterData.system.faults.batVoltHigh = true
+        }
+        if (warnings[12] == 1) {
+          debug_log("Battery Voltage Low Fault")
+          inverterData.system.faults.batVoltLow = true
+        }
+        if (warnings[13] == 1) {
+          debug_log("reserved Fault")
+          // inverterData.system.faults.xxx = true
+        }
+        if (warnings[14] == 1) {
+          debug_log("Battery Under Shutdown Faultt")
+          inverterData.system.faults.batUnderShutdown = true
+        }
+        if (warnings[15] == 1) {
+          debug_log("reserved Fault")
+          // inverterData.system.faults.xxx = true
+        }
+        if (warnings[16] == 1) {
+          debug_log("Overload Fault")
+          inverterData.system.faults.overload = true
+        }
+        if (warnings[17] == 1) {
+          debug_log("EEPROM Fault")
+          inverterData.system.faults.eepromFault = true
+        }
+        if (warnings[18] == 1) {
+          debug_log("Inverter Over Current Fault")
+          inverterData.system.faults.invOverCurrent = true
+        }
+        if (warnings[19] == 1) {
+          debug_log("Inverter Soft Fail Fault")
+          inverterData.system.faults.invSoftFail = true
+        }
+        if (warnings[20] == 1) {
+          debug_log("Inverter Self Test Fail Fault")
+          inverterData.system.faults.invSelfTest = true
+        }
+        if (warnings[21] == 1) {
+          debug_log("Inverter OP DC Voltage Over Fault")
+          inverterData.system.faults.invOPDCvoltOver = true
+        }
+        if (warnings[22] == 1) {
+          debug_log("Inverter Bat Open Fault")
+          inverterData.system.faults.invBatOpen = true
+        }
+        if (warnings[23] == 1) {
+          debug_log("Inverter Current Sensor Fault")
+          inverterData.system.faults.invCurSensorFail = true
+        }
+        if (warnings[24] == 1) {
+          debug_log("Inverter Battery Short Fault")
+          inverterData.system.faults.invBatShort = true
+        }
+        if (warnings[25] == 1) {
+          debug_log("Inverter Power Limit Warning")
+          inverterData.system.faults.invPowerLimiting = true
+        }
+        if (warnings[26] == 1) {
+          debug_log("PV Voltage High Warning")
+          inverterData.system.faults.pvVoltHigh = true
+        }
+        if (warnings[27] == 1) {
+          debug_log("MPPT Overload Fault")
+          inverterData.system.faults.mpptOverloadFault = true
+        }
+        if (warnings[28] == 1) {
+          debug_log("MPPT Overload Warning")
+          inverterData.system.faults.mpptOverloadWarn = true
+        }
+        if (warnings[29] == 1) {
+          debug_log("Battery too low to charge Warning")
+          inverterData.system.faults.batTooLowtoCharge = true
+        }
+        if (warnings[30] == 1) {
+          debug_log("reserved Fault")
+          // inverterData.system.faults.xxx = true
+        }
+        if (warnings[31] == 1) {
+          debug_log("reserved Fault")
+          // inverterData.system.faults.xxx = true
+        }
+      } else if (command == "QPI") { // Device protocol ID
+        var protocol = line.toString().replace(/[^\w.]+/g, " ").split(" ")[1]
+        debug_log(protocol)
+        inverterData.system.protocol = protocol
+      } else if (command == "QID") { // Serial Number
+        var id = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1]
+        debug_log(id)
+        inverterData.system.serialnumber = id;
+      } else if (command == "QVFW") { // Device protocol ID
+        var fw1 = data.toString().replace(/[^\w.]+/g, " ").split(" ")[2]
+        debug_log(fw1)
+        inverterData.system.firmware.qvfw = fw1
+      } else if (command == "QVFW2") { // Device protocol ID
+        var fw2 = data.toString().replace(/[^\w.]+/g, " ").split(" ")[2]
+        debug_log(fw2)
+        inverterData.system.firmware.qvfw2 = fw2
+      } else {
+        console.log("-------------------")
+        console.log("Command: ", command)
+        console.log("received: ", line)
+      }
     }
 
-    if (statusstring[1] == 0) {
-      debug_log("    configuration status unchanged")
-    } else if (statusstring[1] == 1) {
-      debug_log("    configuration status changed")
-    }
-
-    if (statusstring[2] == 1) {
-      debug_log("    SCC firmware version Updated")
-    } else if (statusstring[2] == 0) {
-      debug_log("    SCC firmware version unchanged")
-    }
-    if (statusstring[3] == 0) {
-      debug_log("    Load Off")
-      inverterData.inverter.loadstatus = "Load Off"
-    } else if (statusstring[3] == 0) {
-      debug_log("    Load On")
-      inverterData.inverter.loadstatus = "Load On"
-    }
-    if (statusstring[4] == 1) {
-      debug_log("    Float Charge", statusstring[4])
-    } else if (statusstring[4] == 0) {
-      debug_log("    Float Charge", statusstring[4])
-    }
-
-    if (statusstring[5] + statusstring[6] + statusstring[7] == "000") {
-      debug_log("    Charge: none")
-      inverterData.battery.chargemode.scc = false;
-      inverterData.battery.chargemode.ac = false;
-    }
-    if (statusstring[5] + statusstring[6] + statusstring[7] == "110") {
-      debug_log("    Charge: scc")
-      inverterData.battery.chargemode.scc = true;
-      inverterData.battery.chargemode.ac = false;
-    }
-    if (statusstring[5] + statusstring[6] + statusstring[7] == "101") {
-      debug_log("    Charge: ac")
-      inverterData.battery.chargemode.scc = false;
-      inverterData.battery.chargemode.ac = true;
-    }
-    if (statusstring[5] + statusstring[6] + statusstring[7] == "111") {
-      debug_log("    Charge: scc and ac")
-      inverterData.battery.chargemode.scc = true;
-      inverterData.battery.chargemode.ac = true;
-    }
-
-  } else if (command == "QMOD") {
-    var devicemode = data.toString().replace(/[^\w.]+/g, " ").split(" ");
-    var mode = ""
-    if (devicemode[1] == "P") {
-      mode += "Power On Mode"
-      inverterData.system.mode = "Power On Mode"
-    }
-    if (devicemode[1] == "S") {
-      mode += "Standby Mode"
-      inverterData.system.mode = "Standby Mode"
-    }
-    if (devicemode[1] == "L") {
-      mode += "Line Mode"
-      inverterData.system.mode = "Line Mode"
-    }
-    if (devicemode[1] == "B") {
-      mode += "Battery Mode"
-      inverterData.system.mode = "Battery Mode"
-    }
-    if (devicemode[1] == "F") {
-      mode += "Fault Mode"
-      inverterData.system.mode = "Fault Mode"
-    }
-    if (devicemode[1] == "H") {
-      mode += "Power Saving Mode"
-      inverterData.system.mode = "Power Saving Mode"
-    }
-    debug_log("Device Mode: ", mode)
-  } else if (command == "QPIRI") {
-    var rating = data.toString().replace(/[^\w.]+/g, " ").split(" ");
-    debug_log(rating)
-    debug_log("Grid rating voltage : ", rating[1]);
-    inverterData.system.settings.gridVoltRating = rating[1]
-    debug_log("Grid rating current : ", rating[2]);
-    inverterData.system.settings.gridCurrentRating = rating[2]
-    debug_log("AC output rating voltage : ", rating[3]);
-    inverterData.system.settings.acOutputVoltRating = rating[3]
-    debug_log("AC output rating frequency : ", rating[4]);
-    inverterData.system.settings.acOutputCFreqRating = rating[4]
-    debug_log("AC output rating current : ", rating[5]);
-    inverterData.system.settings.acOutputCurrentRating = rating[5]
-    debug_log("AC output rating apparent power: ", rating[6]);
-    inverterData.system.settings.acOutputApparentPowerRating = rating[6]
-    debug_log("AC output rating active power : ", rating[7]);
-    inverterData.system.settings.acOutputActivePowerRating = rating[7]
-    debug_log("Battery rating voltage : ", rating[8]);
-    inverterData.system.settings.batteryVoltRating = rating[8]
-    debug_log("Battery re-charge voltage : ", rating[9]);
-    inverterData.system.settings.batteryRechargeVoltage = rating[9]
-    debug_log("Battery under voltage: ", rating[10]);
-    inverterData.system.settings.batteryUnderVoltage = rating[10]
-    debug_log("Battery bulk voltage: ", rating[11]);
-    inverterData.system.settings.batteryBulkVoltage = rating[11]
-    debug_log("Battery float voltage : ", rating[12]);
-    inverterData.system.settings.batteryFloatVoltage = rating[12]
-    debug_log("Battery type : ", rating[13]);
-    inverterData.system.settings.batteryType = rating[13]
-    debug_log("Current max AC charging current: ", rating[14]);
-    inverterData.system.settings.maxACChargingCurrent = rating[14]
-    debug_log("Current max charging current: ", rating[15]);
-    inverterData.system.settings.maxChargingCurrent = rating[15]
-    debug_log("Input voltage range: ", rating[16]);
-    inverterData.system.settings.inputVoltageRange = rating[16]
-    debug_log("Output source priority: ", rating[17]);
-    inverterData.system.settings.outputSourcePriority = rating[17]
-    debug_log("Charger source priority : ", rating[18]);
-    inverterData.system.settings.chargerSourcePriority = rating[18]
-    debug_log("Parallel max num: ", rating[19]);
-    inverterData.system.settings.parallelMaxNum = rating[19]
-    debug_log("Machine type : ", rating[20]);
-    inverterData.system.settings.machineType = rating[20]
-    debug_log("Topology: ", rating[21]);
-    inverterData.system.settings.topology = rating[21]
-    debug_log("Output mode: ", rating[22]);
-    inverterData.system.settings.outputMode = rating[22]
-    debug_log("Battery re-discharge voltage : ", rating[23]);
-    inverterData.system.settings.batteryReDischargeVoltage = rating[23]
-    debug_log("PV OK condition for parallel: ", rating[24]);
-    inverterData.system.settings.pvOKparallel = rating[24]
-    debug_log("PV power balance: ", rating[25]);
-    inverterData.system.settings.pvPowerBalance = rating[25]
-  } else if (command == "QPIWS") {
-    var warnings = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1].split("");
-    debug_log("Faults:")
-
-    for (var fault in inverterData.system.faults) {
-      // skip loop if the property is from prototype
-      if (!inverterData.system.faults.hasOwnProperty(fault)) continue;
-
-      // reset status so we can set it from data
-      inverterData.system.faults[fault] = false;
-    }
-
-    if (warnings[1] == 1) {
-      debug_log("Inverter Fault")
-      inverterData.system.faults.inverter = true
-    }
-    if (warnings[2] == 1) {
-      debug_log("Bus Over Fault")
-      inverterData.system.faults.busOver = true
-    }
-    if (warnings[3] == 1) {
-      debug_log("Bus Under Fault")
-      inverterData.system.faults.busUnder = true
-    }
-    if (warnings[4] == 1) {
-      debug_log("Bus Soft Fault")
-      inverterData.system.faults.busSoft = true
-    }
-    if (warnings[5] == 1) {
-      debug_log("Line Fail Fault")
-      inverterData.system.faults.lineFail = true
-    }
-    if (warnings[6] == 1) {
-      debug_log("OPV Short Fault")
-      inverterData.system.faults.opvShort = true
-    }
-    if (warnings[7] == 1) {
-      debug_log("Inverter Voltage Low Fault")
-      inverterData.system.faults.invVoltLow = true
-    }
-    if (warnings[8] == 1) {
-      debug_log("Inverter Voltage High Fault")
-      inverterData.system.faults.invVoltHigh = true
-    }
-    if (warnings[9] == 1) {
-      debug_log("Over Temp Fault")
-      inverterData.system.faults.overTemp = true
-    }
-    if (warnings[10] == 1) {
-      debug_log("Fan Locked Fault")
-      inverterData.system.faults.fanLocked = true
-    }
-    if (warnings[11] == 1) {
-      debug_log("Battery Voltage High Fault")
-      inverterData.system.faults.batVoltHigh = true
-    }
-    if (warnings[12] == 1) {
-      debug_log("Battery Voltage Low Fault")
-      inverterData.system.faults.batVoltLow = true
-    }
-    if (warnings[13] == 1) {
-      debug_log("reserved Fault")
-      // inverterData.system.faults.xxx = true
-    }
-    if (warnings[14] == 1) {
-      debug_log("Battery Under Shutdown Faultt")
-      inverterData.system.faults.batUnderShutdown = true
-    }
-    if (warnings[15] == 1) {
-      debug_log("reserved Fault")
-      // inverterData.system.faults.xxx = true
-    }
-    if (warnings[16] == 1) {
-      debug_log("Overload Fault")
-      inverterData.system.faults.overload = true
-    }
-    if (warnings[17] == 1) {
-      debug_log("EEPROM Fault")
-      inverterData.system.faults.eepromFault = true
-    }
-    if (warnings[18] == 1) {
-      debug_log("Inverter Over Current Fault")
-      inverterData.system.faults.invOverCurrent = true
-    }
-    if (warnings[19] == 1) {
-      debug_log("Inverter Soft Fail Fault")
-      inverterData.system.faults.invSoftFail = true
-    }
-    if (warnings[20] == 1) {
-      debug_log("Inverter Self Test Fail Fault")
-      inverterData.system.faults.invSelfTest = true
-    }
-    if (warnings[21] == 1) {
-      debug_log("Inverter OP DC Voltage Over Fault")
-      inverterData.system.faults.invOPDCvoltOver = true
-    }
-    if (warnings[22] == 1) {
-      debug_log("Inverter Bat Open Fault")
-      inverterData.system.faults.invBatOpen = true
-    }
-    if (warnings[23] == 1) {
-      debug_log("Inverter Current Sensor Fault")
-      inverterData.system.faults.invCurSensorFail = true
-    }
-    if (warnings[24] == 1) {
-      debug_log("Inverter Battery Short Fault")
-      inverterData.system.faults.invBatShort = true
-    }
-    if (warnings[25] == 1) {
-      debug_log("Inverter Power Limit Warning")
-      inverterData.system.faults.invPowerLimiting = true
-    }
-    if (warnings[26] == 1) {
-      debug_log("PV Voltage High Warning")
-      inverterData.system.faults.pvVoltHigh = true
-    }
-    if (warnings[27] == 1) {
-      debug_log("MPPT Overload Fault")
-      inverterData.system.faults.mpptOverloadFault = true
-    }
-    if (warnings[28] == 1) {
-      debug_log("MPPT Overload Warning")
-      inverterData.system.faults.mpptOverloadWarn = true
-    }
-    if (warnings[29] == 1) {
-      debug_log("Battery too low to charge Warning")
-      inverterData.system.faults.batTooLowtoCharge = true
-    }
-    if (warnings[30] == 1) {
-      debug_log("reserved Fault")
-      // inverterData.system.faults.xxx = true
-    }
-    if (warnings[31] == 1) {
-      debug_log("reserved Fault")
-      // inverterData.system.faults.xxx = true
-    }
-  } else if (command == "QPI") { // Device protocol ID
-    var protocol = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1]
-    debug_log(protocol)
-    inverterData.system.protocol = protocol
-  } else if (command == "QID") { // Serial Number
-    var id = data.toString().replace(/[^\w.]+/g, " ").split(" ")[1]
-    debug_log(id)
-    inverterData.system.serialnumber = id;
-  } else if (command == "QVFW") { // Device protocol ID
-    var fw1 = data.toString().replace(/[^\w.]+/g, " ").split(" ")[2]
-    debug_log(fw1)
-    inverterData.system.firmware.qvfw = fw1
-  } else if (command == "QVFW2") { // Device protocol ID
-    var fw2 = data.toString().replace(/[^\w.]+/g, " ").split(" ")[2]
-    debug_log(fw2)
-    inverterData.system.firmware.qvfw2 = fw2
-  } else {
-    console.log("-------------------")
-    console.log("Command: ", command)
-    console.log("received: ", data)
+    // Update the output with the incomplete line
+    output = lastLine;
   }
+
+
 })
 
 
@@ -572,8 +617,8 @@ setInterval(function() {
   var crc = compute(command)
   var hexToSend = toHex(command) + crc + "0d"
   var toSend = Buffer.from(hexToSend, 'hex');
-  debug_log("sending: ", toSend)
-  port.write(toSend)
+  debug_log("sending: " + command + " as ", toSend)
+  device.write(toSend)
 
   if (commandOrder == commandsToRun.length - 1) {
     commandOrder = 0
@@ -593,7 +638,7 @@ setInterval(function() {
     var gridamps = 0
   }
 
-}, 1000);
+}, 3000);
 
 setInterval(function() {
   io.sockets.emit('inverterData', inverterData);
@@ -632,7 +677,7 @@ setInterval(function() {
   client.publish("homeassistant/sensor/inverter_Out_source_priority", inverterData.system.settings.outputSourcePriority.toString());
   client.publish("homeassistant/sensor/inverter_Charger_source_priority", inverterData.system.settings.chargerSourcePriority.toString());
   client.publish("homeassistant/sensor/inverter_Battery_redischarge_voltage", inverterData.system.settings.batteryReDischargeVoltage.toString());
-  console.log("----------------updated mqtt-------------------")
+  //console.log("----------------updated mqtt-------------------")
 }, 1000)
 
 

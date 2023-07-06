@@ -1,6 +1,6 @@
 {
   "name": "solarstats",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Solar Inverter Statistics Monitoring",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,8 @@
     "influx": "^5.5.1",
     "ip": "^1.1.5",
     "mqtt": "^4.2.1",
+    "node-hid": "^2.1.2",
+    "node-hid-stream": "^1.1.0",
     "serialport": "^8.0.7",
     "socket.io": "^2.4.0"
   }
