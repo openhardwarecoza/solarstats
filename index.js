@@ -94,14 +94,10 @@ var initConfig = [
   ["Battery_redischarge_voltage", "V", "battery-negative"]
 ]
 
-client.on('connect', function() {
-  console.log("Connected MQTT");
+function createMQTTentities() {
   client.subscribe('/homeassistant/sensor/sensor.inverter/command', function(err) {
     if (!err) {
       for (i = 0; i < initConfig.length; i++) {
-
-
-
         if (initConfig[i][0] == "Load_watt" || initConfig[i][0] == "PV_in_watts") {
           var string = `{
               \"name\": \"sensor.inverter_` + initConfig[i][0] + `\",
@@ -120,10 +116,18 @@ client.on('connect', function() {
         }
         client.publish("homeassistant/sensor/inverter_" + initConfig[i][0] + "/config", string);
       }
-
     }
   })
+}
+
+client.on('connect', function() {
+  console.log("Connected MQTT");
+  createMQTTentities();
 })
+
+setInterval(function() { // in case HA gets restarted
+  createMQTTentities();
+}, 30000)
 
 
 client.on('message', function(topic, message) {
@@ -642,8 +646,6 @@ setInterval(function() {
 
 setInterval(function() {
   io.sockets.emit('inverterData', inverterData);
-
-
 
   client.publish("homeassistant/sensor/inverter_Load_status_on", inverterData.inverter.loadstatus.toString());
   client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.system.mode.toString());
