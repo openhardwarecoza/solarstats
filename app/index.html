@@ -7,16 +7,316 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" type="text/css" href="styles.css">
 
-
     <meta name="metro4:init" content="true">
     <link rel="stylesheet" href="lib/metro/css/metro-all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
   </head>
 
 
 
   <body>
 
+    <table class="table striped table-border subcompact">
+      <tr>
+        <th>Number</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+      <!-- Segment 1 -->
+      <tr>
+        <td>01</td>
+        <td>Output Source Priority</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="USB">USB</option>
+            <option value="SUB">SUB</option>
+            <option value="SBU">SBU</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>02</td>
+        <td>Max Charging Current</td>
+        <td>
+          <select data-role="input" data-append="Amps" data-clear-button="false">
+            <option value="10A">10A</option>
+            <option value="20A">20A</option>
+            <option value="30A">30A</option>
+            <option value="40A">40A</option>
+            <option value="50A">50A</option>
+            <option value="60A">60A</option>
+            <option value="70A">70A</option>
+            <option value="80A">80A</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>03</td>
+        <td>AC Input Voltage Range</td>
+        <td>
+          <select data-role="input" data-append="VAC" data-clear-button="false">
+            <option value="APL">APL 90-280VAC</option>
+            <option value="UPS">UPS 170-280VAC</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>05</td>
+        <td>Battery Type</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="AGM">AGM</option>
+            <option value="Flooded">Flooded</option>
+            <option value="User-Defined">User-Defined</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>06</td>
+        <td>Auto Restart when Overload occurs</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Disable Default">Disable Default</option>
+            <option value="Enable">Enable</option>
+          </select>
+        </td>
+      </tr>
+      <!-- Segment 2 -->
+      <tr>
+        <td>07</td>
+        <td>Auto Restart when Over Temperature occurs</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Disable Default">Disable Default</option>
+            <option value="Enable">Enable</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>09</td>
+        <td>Output Frequency</td>
+        <td>
+          <select data-role="input" data-append="Hz" data-clear-button="false">
+            <option value="50Hz">50Hz</option>
+            <option value="60Hz">60Hz</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>Output Voltage</td>
+        <td>
+          <select data-role="input" data-append="VAC" data-clear-button="false">
+            <option value="220V">220V</option>
+            <option value="230V">230V</option>
+            <option value="240V">240V</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td>Maximum Utility Charging Current</td>
+        <td>
+          <select data-role="input" data-append="Amps" data-clear-button="false">
+            <option value="2A">2A</option>
+            <option value="10A">10A</option>
+            <option value="20A">20A</option>
+            <option value="30A">30A Default</option>
+            <option value="40A">40A</option>
+            <option value="50A">50A</option>
+            <option value="60A">60A</option>
+            <option value="70A">70A (Only for 3KVA)</option>
+            <option value="80A">80A (Only for 3KVA)</option>
+          </select>
+        </td>
+      </tr>
+      <!-- Segment 3 -->
+      <tr>
+        <td>12</td>
+        <td>Setting voltage point back to Utility Source when running in SBU or Solar First</td>
+        <td>
+          <select data-role="input" data-append="VDC" data-clear-button="false">
+            <option value="22.0V">22.0V</option>
+            <option value="22.5V">22.5V</option>
+            <option value="23.0V">23.0V</option>
+            <option value="23.5V">23.5V</option>
+            <option value="24.0V">24.0V</option>
+            <option value="24.5V">24.5V</option>
+            <option value="25.0V">25.0V</option>
+            <option value="25.5V">25.5V</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>13</td>
+        <td>Setting voltage point back to Battery Mode when running in SBU or Solar First</td>
+        <td>
+          <select data-role="input" data-append="VDC" data-clear-button="false">
+            <option value="Battery Fully Charged">Battery Fully Charged</option>
+            <option value="24.0V">24.0V</option>
+            <option value="24.5V">24.5V</option>
+            <option value="25.0V">25.0V</option>
+            <option value="25.5V">25.5V</option>
+            <option value="26.0V">26.0V</option>
+            <option value="26.5V">26.5V</option>
+            <option value="27.0V">27.0V</option>
+            <option value="27.5V">27.5V</option>
+            <option value="28.0V">28.0V</option>
+            <option value="28.5V">28.5V</option>
+            <option value="29.0V">29.0V</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>16</td>
+        <td>Charger Source Priority When Inverter is in Line, Standby or Fault mode</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Utility First">Utility First</option>
+            <option value="Solar First">Solar First</option>
+            <option value="Solar and Utility (Default)">Solar and Utility (Default)</option>
+            <option value="Only Solar">Only Solar</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>18</td>
+        <td>Alarm Control</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Alarm On">Alarm On</option>
+            <option value="Alarm Off">Alarm Off</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>19</td>
+        <td>Auto Return to Default Display Screen</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Return to Default Screen">Return to Default Screen</option>
+            <option value="Stay on last selected Screen">Stay on last selected Screen</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>20</td>
+        <td>Backlight Control</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Backlight On">Backlight On</option>
+            <option value="Backlight Off">Backlight Off</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>22</td>
+        <td>Beep when Primary Source is interrupted</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Beep On">Beep On</option>
+            <option value="Beep Off">Beep Off</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>23</td>
+        <td>Overload Bypass</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Bypass Disabled (Default)">Bypass Disabled (Default)</option>
+            <option value="Bypass Enabled">Bypass Enabled</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>25</td>
+        <td>Record Fault Code</td>
+        <td>
+          <select data-role="input" data-clear-button="false">
+            <option value="Record Enable">Record Enable</option>
+            <option value="Record Disabled">Record Disabled</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>26</td>
+        <td>Bulk Charging Voltage</td>
+        <td>
+          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
+        </td>
+      </tr>
+      <tr>
+        <td>27</td>
+        <td>Float Charging Voltage</td>
+        <td>
+          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
+        </td>
+      </tr>
+      <tr>
+        <td>29</td>
+        <td>Low DC Cutoff Voltage</td>
+        <td>
+          <input type="number" data-min-value="21.0" data-max-value="24.0" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
 
+          <input type="number" step="0.1" min="21.0" max="24.0">
+
+        </td>
+      </tr>
+      <!-- Segment 8 -->
+      <tr>
+        <td>30</td>
+        <td>Battery Equalization</td>
+        <td>
+          <select>
+            <option value="Enabled">Enabled</option>
+            <option value="Disabled">Disabled</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>31</td>
+        <td>Battery Equalization Voltage</td>
+        <td>
+          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
+        </td>
+      </tr>
+      <tr>
+        <td>33</td>
+        <td>Battery Equalization Time</td>
+        <td>
+          <input type="number" data-min-value="5" data-max-value="900" data-step="5" data-role="spinner" data-append="Source" data-clear-button="false">
+        </td>
+      </tr>
+      <tr>
+        <td>34</td>
+        <td>Battery Equalization Timeout</td>
+        <td>
+          <input type="number" data-min-value="5" data-max-value="900" data-step="5" data-role="spinner" data-append="Source" data-clear-button="false">
+        </td>
+      </tr>
+      <tr>
+        <td>35</td>
+        <td>Equalization Interval</td>
+        <td>
+          <input type="number" step="1" min="0" max="90">
+          <input type="number" data-min-value="0" data-max-value="90" data-step="1" data-role="spinner" data-append="Source" data-clear-button="false">
+        </td>
+      </tr>
+      <tr>
+        <td>36</td>
+        <td>Equalization Activated Immediately</td>
+        <td>
+          <select>
+            <option value="Run Now">Run Now</option>
+            <option value="Disable (Default)">Disable (Default)</option>
+          </select>
+          <span class="appended-label">&#9662;</span>
+
+        </td>
+      </tr>
+    </table>
 
     <div class="row">
 

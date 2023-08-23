@@ -34,6 +34,7 @@ var HID = require('node-hid');
 var device = new HID.HID(1637, 20833)
 let output = '';
 
+var manualCommand = false;
 
 const httpserver = http.listen(8080, '0.0.0.0', function() {
   debug_log('http:  listening on:' + ip.address() + ":" + 8080);
@@ -44,8 +45,9 @@ app.use(express.static(path.join(__dirname, "app")));
 
 io.on('connection', function(socket) {
   socket.emit('welcome', inverterData);
-  socket.on('my other event', function(data) {
+  socket.on('sendCommand', function(data) {
     debug_log(data);
+    manualCommand = data
   });
 });
 
@@ -60,7 +62,7 @@ options = {
 var client = mqtt.connect('mqtt://192.168.0.245:1883', options)
 
 var initConfig = [
-  ["Inverter_mode", "", "solar-power"], //#1 = Power_On, 2 = Standby, 3 = Line, 4 = Battery, 5 = Fault, 6 = Power_Saving, 7 = Unknown["AC_grid_voltage", "V", "power-plug"],
+  ["Inverter_mode", "", "power-plug"], //#1 = Power_On, 2 = Standby, 3 = Line, 4 = Battery, 5 = Fault, 6 = Power_Saving, 7 = Unknown["AC_grid_voltage", "V", "power-plug"],
   ["AC_grid_voltage", "V", "power-plug"],
   ["AC_grid_frequency", "Hz", "current-ac"],
   ["AC_out_voltage", "V", "power-plug"],
@@ -83,6 +85,7 @@ var initConfig = [
   ["Load_status_on", "", "power"],
   ["SCC_charge_on", "", "power"],
   ["AC_charge_on", "", "power"],
+  ["Float_charge_on", "", "power"],
   ["Battery_recharge_voltage", "V", "current-dc"],
   ["Battery_under_voltage", "V", "current-dc"],
   ["Battery_bulk_voltage", "V", "current-dc"],
@@ -135,6 +138,7 @@ client.on('message', function(topic, message) {
   console.log('message')
   console.log(message.toString())
   //client.end()
+  manualCommand = message.toString();
 })
 
 var sentBuffer = [];
@@ -163,8 +167,9 @@ var inverterData = {
     dischargecurrent: 0,
     capacity: 0,
     chargemode: {
-      scc: false,
-      ac: false
+      scc: 0,
+      ac: 0,
+      float: 0
     }
   },
   pv: {
@@ -328,40 +333,67 @@ device.on('data', function(data) {
         }
         if (statusstring[3] == 0) {
           debug_log("    Load Off")
-          inverterData.inverter.loadstatus = "Load Off"
-        } else if (statusstring[3] == 0) {
+          inverterData.inverter.loadstatus = "0"
+        } else if (statusstring[3] == 1) {
           debug_log("    Load On")
-          inverterData.inverter.loadstatus = "Load On"
+          inverterData.inverter.loadstatus = "1"
         }
         if (statusstring[4] == 1) {
           debug_log("    Float Charge", statusstring[4])
+          inverterData.battery.chargemode.float = "1";
         } else if (statusstring[4] == 0) {
           debug_log("    Float Charge", statusstring[4])
+          inverterData.battery.chargemode.float = "0";
         }
 
         if (statusstring[5] + statusstring[6] + statusstring[7] == "000") {
           debug_log("    Charge: none")
-          inverterData.battery.chargemode.scc = false;
-          inverterData.battery.chargemode.ac = false;
+          inverterData.battery.chargemode.scc = "0";
+          inverterData.battery.chargemode.ac = "0";
         }
         if (statusstring[5] + statusstring[6] + statusstring[7] == "110") {
           debug_log("    Charge: scc")
-          inverterData.battery.chargemode.scc = true;
-          inverterData.battery.chargemode.ac = false;
+          inverterData.battery.chargemode.scc = "1";
+          inverterData.battery.chargemode.ac = "0";
         }
-        if (statusstring[5] + statusstring[6] + statusstring[7] == "101") {
+        if (statusstring[5] + statusstring[6] + statusstring[7] == "101" || statusstring[5] + statusstring[6] + statusstring[7] == "001") {
           debug_log("    Charge: ac")
-          inverterData.battery.chargemode.scc = false;
-          inverterData.battery.chargemode.ac = true;
+          inverterData.battery.chargemode.scc = "0";
+          inverterData.battery.chargemode.ac = "1";
         }
         if (statusstring[5] + statusstring[6] + statusstring[7] == "111") {
           debug_log("    Charge: scc and ac")
-          inverterData.battery.chargemode.scc = true;
-          inverterData.battery.chargemode.ac = true;
+          inverterData.battery.chargemode.scc = "1";
+          inverterData.battery.chargemode.ac = "1";
         }
       } else if (command == "QMOD") {
         var devicemode = line.toString().replace(/[^\w.]+/g, " ").split(" ");
         var mode = ""
+        var result;
+        switch (devicemode[1]) {
+          case 'P':
+            result = 1;
+            break; // Power_On
+          case 'S':
+            result = 2;
+            break; // Standby
+          case 'L':
+            result = 3;
+            break; // Line
+          case 'B':
+            result = 4;
+            break; // Battery
+          case 'F':
+            result = 5;
+            break; // Fault
+          case 'H':
+            result = 6;
+            break; // Power_Saving
+          default:
+            result = 0;
+            break; // Unknown
+        }
+        inverterData.inverter.invertermode = result;
         if (devicemode[1] == "P") {
           mode += "Power On Mode"
           inverterData.system.mode = "Power On Mode"
@@ -616,7 +648,21 @@ var commandOrder = 0;
 var commandsToRun = ["QMOD", "QPIGS", "QPIRI", "QPIWS", "QPI", "QID", "QVFW", "QVFW2"]
 setInterval(function() {
 
-  command = commandsToRun[commandOrder]
+  if (manualCommand != false) {
+    command = manualCommand;
+    console.log("Manual command: " + command)
+    manualCommand = false;
+  } else {
+    command = commandsToRun[commandOrder]
+    console.log("Standard commands: " + command)
+    if (commandOrder == commandsToRun.length - 1) {
+      commandOrder = 0
+    } else {
+      commandOrder++
+    }
+
+  }
+
   sentBuffer.push(command)
   var crc = compute(command)
   var hexToSend = toHex(command) + crc + "0d"
@@ -624,31 +670,13 @@ setInterval(function() {
   debug_log("sending: " + command + " as ", toSend)
   device.write(toSend)
 
-  if (commandOrder == commandsToRun.length - 1) {
-    commandOrder = 0
-  } else {
-    commandOrder++
-  }
-
-  var batteryamps = parseFloat(inverterData.battery.chargingcurrent) - parseFloat(inverterData.battery.dischargecurrent);
-  var loadamps = parseFloat(inverterData.inverter.apparentpwr) / parseFloat(inverterData.inverter.voltage);
-  // calculate grid load in amps
-  var totalLoad = parseFloat(inverterData.inverter.apparentpwr);
-  var batteryWatts = (parseFloat(inverterData.battery.voltage) * batteryamps) * -1;
-  var solarWatts = parseFloat(inverterData.pv.voltage) * parseFloat(inverterData.pv.current);
-  if (inverterData.grid.voltage != 0) {
-    var gridamps = ((totalLoad + (batteryWatts * -1)) - solarWatts) / inverterData.grid.voltage
-  } else {
-    var gridamps = 0
-  }
-
 }, 3000);
 
 setInterval(function() {
   io.sockets.emit('inverterData', inverterData);
 
-  client.publish("homeassistant/sensor/inverter_Load_status_on", inverterData.inverter.loadstatus.toString());
-  client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.system.mode.toString());
+  client.publish("homeassistant/sensor/inverter_Load_status_on", (+inverterData.inverter.loadstatus).toString());
+  client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.inverter.invertermode.toString());
   client.publish("homeassistant/sensor/inverter_AC_grid_voltage", inverterData.grid.voltage.toString());
   client.publish("homeassistant/sensor/inverter_AC_grid_frequency", inverterData.grid.freq.toString());
   client.publish("homeassistant/sensor/inverter_AC_out_voltage", inverterData.inverter.voltage.toString());
@@ -670,6 +698,7 @@ setInterval(function() {
   client.publish("homeassistant/sensor/inverter_Battery_discharge_current", inverterData.battery.dischargecurrent.toString());
   client.publish("homeassistant/sensor/inverter_SCC_charge_on", inverterData.battery.chargemode.scc.toString());
   client.publish("homeassistant/sensor/inverter_AC_charge_on", inverterData.battery.chargemode.ac.toString());
+  client.publish("homeassistant/sensor/inverter_Float_charge_on", inverterData.battery.chargemode.float.toString());
   client.publish("homeassistant/sensor/inverter_Battery_recharge_voltage", inverterData.system.settings.batteryRechargeVoltage.toString());
   client.publish("homeassistant/sensor/inverter_Battery_under_voltage", inverterData.system.settings.batteryUnderVoltage.toString());
   client.publish("homeassistant/sensor/inverter_Battery_bulk_voltage", inverterData.system.settings.batteryBulkVoltage.toString());

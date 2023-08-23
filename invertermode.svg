@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="642"
+   height="174"
+   viewBox="0 0 169.8625 46.037501"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="invertermode.svg"
+   inkscape:export-filename="C:\Users\user\Documents\OPENHARDWARECOZA\solarstats\chargemode-both.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2">
+    <rect
+       x="-13.229167"
+       y="0"
+       width="47.625"
+       height="26.458333"
+       id="rect1229" />
+    <rect
+       x="58.208333"
+       y="18.520833"
+       width="103.1875"
+       height="13.229167"
+       id="rect1211" />
+    <rect
+       x="60.854167"
+       y="18.520833"
+       width="100.54167"
+       height="13.229167"
+       id="rect1205" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="158.18647"
+     inkscape:cy="78.582915"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="true"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid326" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       d="M 4.2282815,22.698012 5.5894761,15.892039 H 16.479036 l 1.361196,6.805973 z M 4.9088794,10.106959 V 9.0860627 H 6.950672 V 10.106959 Z M 5.4873865,21.677115 H 10.523809 V 19.805473 H 5.8617155 Z m 1.3611958,-7.826869 -0.7316434,-0.714627 1.4462708,-1.44627 0.7316421,0.714628 z M 6.0658948,18.784577 H 10.523809 V 16.912934 H 6.4402238 Z m 4.9683622,-6.635825 q -1.2591062,0 -2.1268674,-0.893284 Q 8.0396271,10.362184 7.9715682,9.0860627 h 1.0208963 q 0.051048,0.8507465 0.6295525,1.4462703 0.578507,0.595523 1.41224,0.595523 0.833731,0 1.412238,-0.595523 0.578509,-0.5955238 0.629554,-1.4462703 h 1.020897 q -0.06806,1.2761213 -0.935823,2.1694053 -0.867762,0.893284 -2.126866,0.893284 z m 0,-3.0626893 z M 10.523809,15.21144 v -2.041792 h 1.020896 v 2.041792 z m 1.020896,6.465675 h 5.036421 l -0.374328,-1.871642 h -4.662093 z m 0,-2.892538 h 4.457914 L 15.62829,16.912934 h -4.083585 z m 3.675227,-4.951346 -1.446271,-1.44627 0.714627,-0.714628 1.463286,1.429255 z M 15.117848,10.106959 V 9.0860627 h 2.041792 v 1.0208963 z"
+       id="path237"
+       style="fill:#008000;stroke-width:0.017015"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <path
+       d="m 15.874995,34.395833 v -1.169724 h 1.852064 q 0.253441,0 0.419152,0.165711 0.165711,0.165711 0.165711,0.419151 0,0.233945 -0.165711,0.409403 -0.165711,0.175459 -0.419152,0.175459 z m 0,3.119264 v -1.169724 h 1.852064 q 0.253441,0 0.419152,0.165711 0.165711,0.165711 0.165711,0.419151 0,0.233945 -0.165711,0.409404 -0.165711,0.175458 -0.419152,0.175458 z m -3.021788,0.779817 q -0.565367,0 -0.965022,-0.458141 -0.399656,-0.458143 -0.399656,-1.10149 H 9.6364653 v -2.729359 h 1.8520637 q 0,-0.643348 0.399656,-1.101491 0.399655,-0.458141 0.965022,-0.458141 h 2.436926 v 5.848622 z M 7.2970171,35.955466 q -1.306192,0 -2.1639908,-0.848052 -0.8577974,-0.848048 -0.8577974,-2.173737 0,-1.325687 0.8577974,-2.173737 0.8577988,-0.848052 2.1639908,-0.848052 h 1.2672017 q 0.6433476,0 1.0527522,-0.409402 0.409403,-0.409404 0.409403,-1.052752 0,-0.643349 -0.409403,-1.052752 -0.4094046,-0.409404 -1.0527522,-0.409404 h -2.924311 q -0.2339449,0 -0.4094043,-0.175458 -0.1754579,-0.175459 -0.1754579,-0.409404 0,-0.25344 0.1754579,-0.419151 0.1754594,-0.165711 0.4094043,-0.165711 h 2.924311 q 1.130733,0 1.8813062,0.750573 0.750573,0.750573 0.750573,1.881307 0,1.130735 -0.750573,1.881305 -0.7505732,0.750575 -1.8813062,0.750575 H 7.2970171 q -0.8188071,0 -1.3354354,0.506881 -0.5166285,0.50688 -0.5166285,1.345182 0,0.838302 0.5166285,1.345183 0.5166283,0.506881 1.3354354,0.506881 h 1.7545865 v 1.169725 z"
+       id="path258"
+       style="fill:#008000;stroke-width:0.0194955" />
+    <path
+       d="m 49.931648,38.247157 v -4.302423 h -3.045962 l 4.568946,-7.310315 v 4.264348 h 3.045964 z m -12.183855,-2.01795 z m -1.142237,2.284473 q -0.485451,0 -0.813843,-0.328394 Q 35.46332,37.856895 35.46332,37.371443 V 11.633044 q 0,-0.485452 0.328393,-0.813843 0.328392,-0.328394 0.813843,-0.328394 h 3.42671 V 8.0540332 h 6.091931 v 2.4367738 h 3.426709 q 0.485452,0 0.813843,0.328394 0.328393,0.328391 0.328393,0.813843 V 24.31187 q -0.609193,0 -1.180311,0.07615 -0.571118,0.07615 -1.104162,0.26651 V 12.775266 H 37.747793 v 23.453932 h 5.787331 q 0.342672,0.647263 0.799566,1.218383 0.456897,0.571119 0.989938,1.06609 z"
+       id="path279"
+       style="fill:#4d4d4d;stroke-width:0.0380747" />
+    <path
+       d="m 29.810293,34.906281 h -8.949857 v -1.020896 h 8.949857 l -4.219705,-4.219704 0.714628,-0.714628 5.444779,5.44478 -5.444779,5.44478 -0.714628,-0.714628 z"
+       id="path300"
+       style="fill:#008000;stroke-width:0.017015" />
+    <path
+       d="M 29.750773,15.024254 H 20.800916 V 14.00336 h 8.949857 l -4.219705,-4.219705 0.714628,-0.714628 5.444779,5.444779 -5.444779,5.444781 -0.714628,-0.714628 z"
+       id="path300-3"
+       style="fill:#008000;stroke-width:0.017015"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.96646px;line-height:1.25;font-family:'Car-Go Plain 3.1 Demo';-inkscape-font-specification:'Car-Go Plain 3.1 Demo';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.248602"
+       x="81.939606"
+       y="8.9846706"
+       id="text344"><tspan
+         sodipodi:role="line"
+         id="tspan342"
+         x="81.939606"
+         y="8.9846706"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.248602">Charge mode</tspan></text>
+    <rect
+       style="opacity:0.5;fill:#b3b3b3;stroke:#4d4d4d;stroke-width:1.5;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+       id="rect372"
+       width="107.15625"
+       height="25.135416"
+       x="59.531246"
+       y="13.229167" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:'Car-Go Plain 3.1 Demo';-inkscape-font-specification:'Car-Go Plain 3.1 Demo';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+       x="63.5"
+       y="29.104166"
+       id="text1201"><tspan
+         sodipodi:role="line"
+         id="tspan1199"
+         x="63.5"
+         y="29.104166"
+         style="stroke-width:0.264583"></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1203"
+       style="font-size:6.35px;line-height:1.25;font-family:'Car-Go Plain 3.1 Demo';-inkscape-font-specification:'Car-Go Plain 3.1 Demo';text-align:center;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect1205)" />
+    <text
+       xml:space="preserve"
+       id="text1209"
+       style="font-size:6.35px;line-height:1.25;font-family:'Car-Go Plain 3.1 Demo';-inkscape-font-specification:'Car-Go Plain 3.1 Demo';text-align:center;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect1211)" />
+    <text
+       xml:space="preserve"
+       style="font-size:12.7px;line-height:1.25;font-family:'Car-Go Plain 3.1 Demo';-inkscape-font-specification:'Car-Go Plain 3.1 Demo';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+       x="114.29999"
+       y="29.633331"
+       id="text1217"><tspan
+         sodipodi:role="line"
+         id="tspan1215"
+         x="114.29999"
+         y="29.633331"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583">BOTH</tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1227"
+       style="font-size:6.35px;line-height:1.25;font-family:'Car-Go Plain 3.1 Demo';-inkscape-font-specification:'Car-Go Plain 3.1 Demo';text-align:center;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect1229);fill:#008000" />
+  </g>
+</svg>

@@ -1,5 +1,7 @@
+var socket;
+
 $(document).ready(function() {
-  var socket = io();
+  socket = io();
 
   socket.on('inverterData', function(data) {
 
@@ -18,21 +20,21 @@ $(document).ready(function() {
       var gridamps = 0
     }
 
-    $('#solar-volt').html(data.pv.voltage.toFixed(1) + " volts");
-    $('#solar-amp').html(data.pv.current.toFixed(1) + " amps");
-    $('#solar-power').html(solarWatts.toFixed(1) + " watt");
+    $('#solar-volt').html(data.pv.voltage + " volts");
+    $('#solar-amp').html(data.pv.current + " amps");
+    $('#solar-power').html(solarWatts.toFixed(2) + " watt");
 
-    $('#grid-volt').html(data.grid.voltage.toFixed(1) + " volts / " + data.grid.freq + "Hz");
-    $('#grid-amp').html(gridamps.toFixed(1) + " amps");
-    $('#grid-power').html((gridamps * data.grid.voltage).toFixed(1) + " watt");
+    $('#grid-volt').html(data.grid.voltage + " volts / " + data.grid.freq + "Hz");
+    $('#grid-amp').html(gridamps.toFixed(2) + " amps");
+    $('#grid-power').html((gridamps * data.grid.voltage).toFixed(2) + " watt");
 
-    $('#load-volt').html(data.inverter.voltage.toFixed(1) + " volts / " + data.inverter.freq + "Hz");
-    $('#load-amp').html(loadamps.toFixed(1) + " amps");
-    $('#load-power').html(data.inverter.apparentpwr.toFixed(1) + " watt / " + data.inverter.loadpercent.toFixed(0) + "%");
+    $('#load-volt').html(data.inverter.voltage + " volts / " + data.inverter.freq + "Hz");
+    $('#load-amp').html(loadamps.toFixed(2) + " amps");
+    $('#load-power').html(data.inverter.apparentpwr + " watt / " + data.inverter.loadpercent + "%");
 
-    $('#battery-volt').html(data.battery.voltage.toFixed(1) + "volts  / " + data.battery.capacity.toFixed(0) + "%");
-    $('#battery-amp').html(batteryamps.toFixed(1) + " amps");
-    $('#battery-power').html(batteryWatts.toFixed(1) + "watt");
+    $('#battery-volt').html(data.battery.voltage + "volts  / " + data.battery.capacity + "%");
+    $('#battery-amp').html(batteryamps + " amps");
+    $('#battery-power').html(batteryWatts + "watt");
 
     $('#inverter-mode').html(data.system.mode);
     $('#inverter-serial').html(data.system.serialnumber);
