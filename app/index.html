@@ -9,134 +9,172 @@
 
     <meta name="metro4:init" content="true">
     <link rel="stylesheet" href="lib/metro/css/metro-all.min.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" integrity="sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ==" crossorigin="anonymous"
+      referrerpolicy="no-referrer"></script>
   </head>
 
 
 
   <body>
 
-    <table class="table striped table-border subcompact">
+    <table class="table striped table-border subcompact text-center">
       <tr>
-        <th>Number</th>
+        <th>Param</th>
         <th>Description</th>
-        <th>Value</th>
+        <th>Current Value</th>
+        <th style="width: 300px;">New Value</th>
+        <th>Set</th>
       </tr>
       <!-- Segment 1 -->
       <tr>
-        <td>01</td>
-        <td>Output Source Priority</td>
+        <td>01<i class="fa-solid fa-check"></i></td>
+        <td>Output Source Priority </td>
+        <td><span id="curVal01">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="USB">USB</option>
-            <option value="SUB">SUB</option>
-            <option value="SBU">SBU</option>
+          <select data-role="input" data-clear-button="false" id="setting-01">
+            <option value="00">00: USB (Util > Solar > Batt)</option>
+            <option value="01">01: SUB (Solar > Util > Batt)</option>
+            <option value="02">02: SBU (Solar > Batt > Util)</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('01');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>02</td>
+        <td>02 (NAK Error on Set)</td>
         <td>Max Charging Current</td>
+        <td><span id="curVal02">unknown</span></td>
         <td>
-          <select data-role="input" data-append="Amps" data-clear-button="false">
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
-            <option value="60">60</option>
-            <option value="70">70</option>
-            <option value="80">80</option>
+          <select data-role="input" data-append="Amps" data-clear-button="false" id="setting-02">
+            <option value="010">10</option>
+            <option value="020">20</option>
+            <option value="030">30</option>
+            <option value="040">40</option>
+            <option value="050">50</option>
+            <option value="060">60</option>
+            <option value="070">70</option>
+            <option value="080">80</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('02');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>03</td>
+        <td>03<i class="fa-solid fa-check"></i></td>
         <td>AC Input Voltage Range</td>
+        <td><span id="curVal03">unknown</span></td>
         <td>
-          <select data-role="input" data-append="VAC" data-clear-button="false">
-            <option value="APL">APL: 90-280VAC</option>
-            <option value="UPS">UPS: 170-280VAC</option>
+          <select data-role="input" data-append="VAC" data-clear-button="false" id="setting-03">
+            <option value="00">APL: 90-280VAC</option>
+            <option value="01">UPS: 170-280VAC</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('03');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>05</td>
+        <td>05<i class="fa-solid fa-check"></i></td>
         <td>Battery Type</td>
+        <td><span id="curVal05">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="AGM">AGM</option>
-            <option value="Flooded">Flooded</option>
-            <option value="User-Defined">User-Defined</option>
+          <select data-role="input" data-clear-button="false" id="setting-05">
+            <option value="00">AGM</option>
+            <option value="01">Flooded</option>
+            <option value="02">User-Defined</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('05');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>06</td>
+        <td>06<i class="fa-solid fa-check"></td>
         <td>Auto Restart when Overload occurs</td>
+        <td><span id="curVal06">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Disable Default">Disabled (Default)</option>
-            <option value="Enable">Enabled</option>
+          <select data-role="input" data-clear-button="false" id="setting-06">
+            <option value="Du">Disabled (Default)</option>
+            <option value="Eu">Enabled</option>
           </select>
         </td>
+        <td>
+          <button class="button primary outline" onclick="set('06');">Set</button>
+        </td>
       </tr>
-      <!-- Segment 2 -->
       <tr>
-        <td>07</td>
+        <td>07<i class="fa-solid fa-check"></td>
         <td>Auto Restart when Over Temperature occurs</td>
+        <td><span id="curVal07">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Disable Default">Disabled (Default)</option>
-            <option value="Enable">Enabled</option>
+          <select data-role="input" data-clear-button="false" id="setting-07">
+            <option value="Dv">Disabled (Default)</option>
+            <option value="Ev">Enabled</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('07');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>09</td>
+        <td>09<i class="fa-solid fa-check"></i></td>
         <td>Output Frequency</td>
+        <td><span id="curVal09">unknown</span></td>
         <td>
-          <select data-role="input" data-append="Hz" data-clear-button="false">
+          <select data-role="input" data-append="Hz" data-clear-button="false" id="setting-09">
             <option value="50">50</option>
             <option value="60">60</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('09');">Set</button>
         </td>
       </tr>
       <tr>
         <td>10</td>
         <td>Output Voltage</td>
+        <td><span id="curVal10">unknown</span></td>
         <td>
-          <select data-role="input" data-append="VAC" data-clear-button="false">
+          <select data-role="input" data-append="VAC" data-clear-button="false" id="setting-10">
             <option value="220">220</option>
             <option value="230">230</option>
             <option value="240">240</option>
           </select>
         </td>
+        <td>
+          <button class="button primary outline" onclick="set('10');">Set</button>
+        </td>
       </tr>
       <tr>
-        <td>11</td>
+        <td>11<i class="fa-solid fa-check"></i></td>
         <td>Maximum Utility Charging Current</td>
+        <td><span id="curVal11">unknown</span></td>
         <td>
-          <select data-role="input" data-append="Amps" data-clear-button="false">
-            <option value="2">2</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30 Default</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
-            <option value="60">60</option>
-            <option value="70">70 (Only for 3KVA)</option>
-            <option value="80">80 (Only for 3KVA)</option>
+          <select data-role="input" data-append="Amps" data-clear-button="false" id="setting-11">
+            <option value="002">2</option>
+            <option value="010">10</option>
+            <option value="020">20</option>
+            <option value="030">30 Default</option>
+            <option value="040">40</option>
+            <option value="050">50</option>
+            <option value="060">60</option>
+            <option value="070">70 (Only for 3KVA)</option>
+            <option value="080">80 (Only for 3KVA)</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('11');">Set</button>
         </td>
       </tr>
       <!-- Segment 3 -->
       <tr>
-        <td>12</td>
+        <td>12<i class="fa-solid fa-check"></i></td>
         <td>Setting voltage point back to Utility Source when running in SBU or Solar First</td>
+        <td><span id="curVal12">unknown</span></td>
         <td>
-          <select data-role="input" data-append="VDC" data-clear-button="false">
+          <select data-role="input" data-append="VDC" data-clear-button="false" id="setting-12">
             <option value="22.0">22.0</option>
             <option value="22.5">22.5</option>
             <option value="23.0">23.0</option>
@@ -147,13 +185,17 @@
             <option value="25.5">25.5</option>
           </select>
         </td>
+        <td>
+          <button class="button primary outline" onclick="set('12');">Set</button>
+        </td>
       </tr>
       <tr>
-        <td>13</td>
+        <td>13<i class="fa-solid fa-check"></i></td>
         <td>Setting voltage point back to Battery Mode when running in SBU or Solar First</td>
+        <td><span id="curVal13">unknown</span></td>
         <td>
-          <select data-role="input" data-append="VDC" data-clear-button="false">
-            <option value="Battery Fully Charged">Battery Fully Charged</option>
+          <select data-role="input" data-append="VDC" data-clear-button="false" id="setting-13">
+            <option value="00.0">Battery Fully Charged</option>
             <option value="24.0">24.0</option>
             <option value="24.5">24.5</option>
             <option value="25.0">25.0</option>
@@ -167,153 +209,214 @@
             <option value="29.0">29.0</option>
           </select>
         </td>
+        <td>
+          <button class="button primary outline" onclick="set('13');">Set</button>
+        </td>
       </tr>
       <tr>
-        <td>16</td>
+        <td>16<i class="fa-solid fa-check"></i></td>
         <td>Charger Source Priority When Inverter is in Line, Standby or Fault mode</td>
+        <td><span id="curVal16">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Utility First">Utility First</option>
-            <option value="Solar First">Solar First</option>
-            <option value="Solar and Utility (Default)">Solar and Utility (Default)</option>
-            <option value="Only Solar">Only Solar</option>
+          <select data-role="input" data-clear-button="false" id="setting-16">
+            <option value="00">00: Utility First</option>
+            <option value="01">01: Solar First</option>
+            <option value="02">02: Solar and Utility (Default)</option>
+            <option value="03">03: Only Solar</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('16');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>18</td>
+        <td>18<i class="fa-solid fa-check"></td>
         <td>Alarm Control</td>
+        <td><span id="curVal18">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Alarm On">Alarm On</option>
-            <option value="Alarm Off">Alarm Off</option>
+          <select data-role="input" data-clear-button="false" id="setting-18">
+            <option value="Ea">Alarm On</option>
+            <option value="Da">Alarm Off</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('18');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>19</td>
+        <td>19<i class="fa-solid fa-check"></td>
         <td>Auto Return to Default Display Screen</td>
+        <td><span id="curVal19">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Return to Default Screen">Return to Default Screen</option>
-            <option value="Stay on last selected Screen">Stay on last selected Screen</option>
+          <select data-role="input" data-clear-button="false" id="setting-19">
+            <option value="Ek">Return to Default Screen</option>
+            <option value="Dk">Stay on last selected Screen</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('19');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>20</td>
+        <td>20<i class="fa-solid fa-check"></td>
         <td>Backlight Control</td>
+        <td><span id="curVal20">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Backlight On">Backlight On</option>
-            <option value="Backlight Off">Backlight Off</option>
+          <select data-role="input" data-clear-button="false" id="setting-20">
+            <option value="Ex">Backlight On</option>
+            <option value="Dx">Backlight Off</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('20');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>22</td>
+        <td>22<i class="fa-solid fa-check"></td>
         <td>Beep when Primary Source is interrupted</td>
+        <td><span id="curVal22">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Beep On">Beep On</option>
-            <option value="Beep Off">Beep Off</option>
+          <select data-role="input" data-clear-button="false" id="setting-22">
+            <option value="Ey">Beep On</option>
+            <option value="Dy">Beep Off</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('22');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>23</td>
+        <td>23<i class="fa-solid fa-check"></td>
         <td>Overload Bypass</td>
+        <td><span id="curVal23">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Bypass Disabled (Default)">Bypass Disabled (Default)</option>
-            <option value="Bypass Enabled">Bypass Enabled</option>
+          <select data-role="input" data-clear-button="false" id="setting-23">
+            <option value="Eb">Bypass Disabled (Default)</option>
+            <option value="Db">Bypass Enabled</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('23');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>25</td>
+        <td>25<i class="fa-solid fa-check"></td>
         <td>Record Fault Code</td>
+        <td><span id="curVal25">unknown</span></td>
         <td>
-          <select data-role="input" data-clear-button="false">
-            <option value="Record Enable">Record Enable</option>
-            <option value="Record Disabled">Record Disabled</option>
+          <select data-role="input" data-clear-button="false" id="setting-25">
+            <option value="Ez">Record Enable</option>
+            <option value="Dz">Record Disabled</option>
           </select>
         </td>
+        <td>
+          <button class="button primary outline" onclick="set('25');">Set</button>
+        </td>
       </tr>
       <tr>
-        <td>26</td>
+        <td>26<i class="fa-solid fa-check"></i></td>
         <td>Bulk Charging Voltage</td>
+        <td><span id="curVal26">unknown</span></td>
         <td>
-          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
+          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-26">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('26');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>27</td>
+        <td>27<i class="fa-solid fa-check"></i></td>
         <td>Float Charging Voltage</td>
+        <td><span id="curVal27">unknown</span></td>
         <td>
-          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
+          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-27">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('27');">Set</button>
         </td>
       </tr>
       <tr>
-        <td>29</td>
+        <td>29<i class="fa-solid fa-check"></i></td>
         <td>Low DC Cutoff Voltage</td>
+        <td><span id="curVal29">unknown</span></td>
         <td>
-          <input type="number" data-min-value="21.0" data-max-value="24.0" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
-
-          <input type="number" step="0.1" min="21.0" max="24.0">
-
+          <input type="number" data-min-value="21.0" data-max-value="24.0" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-29">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('29');">Set</button>
         </td>
       </tr>
       <!-- Segment 8 -->
       <tr>
         <td>30</td>
         <td>Battery Equalization</td>
+        <td><span id="curVal30">unknown</span></td>
         <td>
-          <select>
+          <select data-role="input" data-clear-button="false" id="setting-30">
             <option value="Enabled">Enabled</option>
             <option value="Disabled">Disabled</option>
           </select>
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('30');">Set</button>
         </td>
       </tr>
       <tr>
         <td>31</td>
         <td>Battery Equalization Voltage</td>
+        <td><span id="curVal31">unknown</span></td>
         <td>
-          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false">
+          <input type="number" data-min-value="25" data-max-value="31.5" data-step="0.1" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-31">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('31');">Set</button>
         </td>
       </tr>
       <tr>
         <td>33</td>
         <td>Battery Equalization Time</td>
+        <td><span id="curVal33">unknown</span></td>
         <td>
-          <input type="number" data-min-value="5" data-max-value="900" data-step="5" data-role="spinner" data-append="Source" data-clear-button="false">
+          <input type="number" data-min-value="5" data-max-value="900" data-step="5" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-33">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('33');">Set</button>
         </td>
       </tr>
       <tr>
         <td>34</td>
         <td>Battery Equalization Timeout</td>
+        <td><span id="curVal34">unknown</span></td>
         <td>
-          <input type="number" data-min-value="5" data-max-value="900" data-step="5" data-role="spinner" data-append="Source" data-clear-button="false">
+          <input type="number" data-min-value="5" data-max-value="900" data-step="5" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-34">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('34');">Set</button>
         </td>
       </tr>
       <tr>
         <td>35</td>
         <td>Equalization Interval</td>
+        <td><span id="curVal35">unknown</span></td>
         <td>
-          <input type="number" step="1" min="0" max="90">
-          <input type="number" data-min-value="0" data-max-value="90" data-step="1" data-role="spinner" data-append="Source" data-clear-button="false">
+          <input type="number" data-min-value="0" data-max-value="90" data-step="1" data-role="spinner" data-append="Source" data-clear-button="false" id="setting-35">
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('35');">Set</button>
         </td>
       </tr>
       <tr>
         <td>36</td>
         <td>Equalization Activated Immediately</td>
+        <td><span id="curVal36">unknown</span></td>
         <td>
-          <select>
+          <select data-role="input" data-clear-button="false" id="setting-36">
             <option value="Run Now">Run Now</option>
             <option value="Disable (Default)">Disable (Default)</option>
           </select>
-          <span class="appended-label">&#9662;</span>
-
+        </td>
+        <td>
+          <button class="button primary outline" onclick="set('36');">Set</button>
         </td>
       </tr>
     </table>

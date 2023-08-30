@@ -1,7 +1,7 @@
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = '1';
 // To see console.log output run with `DEBUGCONTROL=true electron .` or set environment variable for DEBUGCONTROL=true
 // debug_log debug overhead
-DEBUG = true;
+DEBUG = false;
 if (process.env.DEBUGCONTROL) {
   DEBUG = true;
   console.log("Console Debugging Enabled")
@@ -123,6 +123,38 @@ function createMQTTentities() {
   })
 }
 
+var commandOrder = 0;
+//"QMOD" // Device Mode inquiry
+//"QPIGS" // Device general status parameters inquiry
+//"QPIRI" // Device Rating Information inquiry
+//"QPIWS" // Device Warning Status inquiry
+var commandsToRun = ["QMOD", "QPIGS", "QPIRI", "QPIWS", "QPI", "QID", "QVFW", "QVFW2", "QFLAG"]
+
+function sendNextCommand() {
+  if (manualCommand != false) {
+    command = manualCommand;
+    console.log("Manual command: " + command)
+    manualCommand = false;
+  } else {
+    command = commandsToRun[commandOrder]
+    //console.log("Standard commands: " + command)
+    if (commandOrder == commandsToRun.length - 1) {
+      commandOrder = 0
+    } else {
+      commandOrder++
+    }
+
+  }
+
+  sentBuffer.push(command)
+  var crc = compute(command)
+  var hexToSend = toHex(command) + crc + "0d"
+  var toSend = Buffer.from(hexToSend, 'hex');
+  debug_log("sending: " + command + " as ", toSend)
+  device.write(toSend)
+}
+
+
 client.on('connect', function() {
   console.log("Connected MQTT");
   createMQTTentities();
@@ -211,6 +243,17 @@ var inverterData = {
       pvOKparallel: 0,
       pvPowerBalance: 0
     },
+    flags: {
+      alarm: 0,
+      overloadBypass: 0,
+      powerSaving: 0,
+      lcdReturnToDefault: 0,
+      overloadRestart: 0,
+      overtempRestart: 0,
+      backlight: 0,
+      primarySourceAlarm: 0,
+      faultCodeRecord: 0
+    },
     faults: {
       inverter: false,
       busOver: false,
@@ -255,6 +298,8 @@ var inverterData = {
 //  delimiter: '\r'
 //}))
 
+sendNextCommand()
+
 device.on('data', function(data) {
 
 
@@ -276,7 +321,80 @@ device.on('data', function(data) {
       // Respond to each line
       console.log('Received line:', line);
       command = sentBuffer.shift();
-      if (command == "QPIGS") {
+      if (command == "QFLAG") {
+        //(ExyzDabjkuv��
+        //ExxxDxxx is the flag status. E means enable, D means disable
+        // A Enable / disable silence buzzer or open buzzer
+        // B Enable / Disable overload bypass function
+        // J Enable / Disable power saving
+        // K Enable / Disable LCD display escape to default page after 1 min timeout
+        // U Enable / Disable overload restart
+        // V Enable / Disable over temperature restart
+        // X Enable / Disable backlight on
+        // Y Enable / Disable alarm on when primary source interrupt
+        // Z Enable / Disable fault code record
+
+        const flagsEnabled = line.match(/E(.*?)D/)[1];
+        if (flagsEnabled.includes("a")) {
+          inverterData.system.flags.alarm = 1
+        }
+        if (flagsEnabled.includes("b")) {
+          inverterData.system.flags.overloadBypass = 1
+        }
+        if (flagsEnabled.includes("j")) {
+          inverterData.system.flags.powerSaving = 1
+        }
+        if (flagsEnabled.includes("k")) {
+          inverterData.system.flags.lcdReturnToDefault = 1
+        }
+        if (flagsEnabled.includes("u")) {
+          inverterData.system.flags.overloadRestart = 1
+        }
+        if (flagsEnabled.includes("v")) {
+          inverterData.system.flags.overtempRestart = 1
+        }
+        if (flagsEnabled.includes("x")) {
+          inverterData.system.flags.backlight = 1
+        }
+        if (flagsEnabled.includes("y")) {
+          inverterData.system.flags.primarySourceAlarm = 1
+        }
+        if (flagsEnabled.includes("z")) {
+          inverterData.system.flags.faultCodeRecord = 1
+        }
+
+
+
+        const flagsDisabled = line.match(/D(.*)/)[1];
+        if (flagsDisabled.includes("a")) {
+          inverterData.system.flags.alarm = 0
+        }
+        if (flagsDisabled.includes("b")) {
+          inverterData.system.flags.overloadBypass = 0
+        }
+        if (flagsDisabled.includes("j")) {
+          inverterData.system.flags.powerSaving = 0
+        }
+        if (flagsDisabled.includes("k")) {
+          inverterData.system.flags.lcdReturnToDefault = 0
+        }
+        if (flagsDisabled.includes("u")) {
+          inverterData.system.flags.overloadRestart = 0
+        }
+        if (flagsDisabled.includes("v")) {
+          inverterData.system.flags.overtempRestart = 0
+        }
+        if (flagsDisabled.includes("x")) {
+          inverterData.system.flags.backlight = 0
+        }
+        if (flagsDisabled.includes("y")) {
+          inverterData.system.flags.primarySourceAlarm = 0
+        }
+        if (flagsDisabled.includes("z")) {
+          inverterData.system.flags.faultCodeRecord = 0
+        }
+
+      } else if (command == "QPIGS") {
         var generalstatus = line.toString().replace(/[^\w.]+/g, " ").split(" ");
         debug_log(JSON.stringify(generalstatus))
         debug_log("Grid Voltage: ", generalstatus[1]);
@@ -634,47 +752,26 @@ device.on('data', function(data) {
 
     // Update the output with the incomplete line
     output = lastLine;
-  }
 
+    // Send the next command in the queue
+    setTimeout(function() {
+      sendNextCommand()
+    }, 100);
+
+    // Update UI
+    io.sockets.emit('inverterData', inverterData);
+
+
+  }
 
 })
 
 
-var commandOrder = 0;
-//"QMOD" // Device Mode inquiry
-//"QPIGS" // Device general status parameters inquiry
-//"QPIRI" // Device Rating Information inquiry
-//"QPIWS" // Device Warning Status inquiry
-var commandsToRun = ["QMOD", "QPIGS", "QPIRI", "QPIWS", "QPI", "QID", "QVFW", "QVFW2"]
-setInterval(function() {
-
-  if (manualCommand != false) {
-    command = manualCommand;
-    console.log("Manual command: " + command)
-    manualCommand = false;
-  } else {
-    command = commandsToRun[commandOrder]
-    console.log("Standard commands: " + command)
-    if (commandOrder == commandsToRun.length - 1) {
-      commandOrder = 0
-    } else {
-      commandOrder++
-    }
-
-  }
-
-  sentBuffer.push(command)
-  var crc = compute(command)
-  var hexToSend = toHex(command) + crc + "0d"
-  var toSend = Buffer.from(hexToSend, 'hex');
-  debug_log("sending: " + command + " as ", toSend)
-  device.write(toSend)
-
-}, 3000);
+//setInterval(function() {
+//sendNextCommand();
+//}, 3000);
 
 setInterval(function() {
-  io.sockets.emit('inverterData', inverterData);
-
   client.publish("homeassistant/sensor/inverter_Load_status_on", (+inverterData.inverter.loadstatus).toString());
   client.publish("homeassistant/sensor/inverter_Inverter_mode", inverterData.inverter.invertermode.toString());
   client.publish("homeassistant/sensor/inverter_AC_grid_voltage", inverterData.grid.voltage.toString());
